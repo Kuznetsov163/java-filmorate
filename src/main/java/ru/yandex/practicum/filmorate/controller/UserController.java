@@ -22,13 +22,13 @@ public class UserController {
         log.info("Получен запрос на создание пользователя: {}", user);
         validateUser(user);
 
-        if (users.values().stream().anyMatch(u -> u.getLogin().equals(user.getLogin()))) {
-            log.warn("Такой логин уже существует");
-            throw new ValidationException("Такой логин уже существует");
+        if (users.values().stream().anyMatch(u -> u.getLogin().equals(user.getLogin()))) {  // проверка есть ли такой логин
+            log.warn("Такой пользователь {} уже существует", user.getLogin());
+            throw new RuntimeException("Такой пользователь уже есть");
         }
-        if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
-            log.warn("Такой email уже существует");
-            throw new ValidationException("Такой email уже существует");
+        if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) { // проверка есть ли такой Email
+            log.warn("Такой email {} уже существует", user.getEmail());
+            throw new RuntimeException("Такой email уже есть");
         }
 
         user.setId(nextId++);
