@@ -54,17 +54,18 @@ public class UserController {
     }
 
     private void validateUser(User user) {
-        if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
+        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             log.warn("Электронная почта должна быть не пустой и содержать символ '@'");
             throw new ValidationException("Электронная почта должна быть не пустой и содержать символ '@'");
         }
-        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
+        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
             log.warn("Логин не может быть пустым и содержать пробелы");
             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
         }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Дата рождения не может быть в будущем");
-            throw new ValidationException("Дата рождения не может быть в будущем");
+        if (user.getBirthday().isAfter(LocalDate.now()) || user.getBirthday().isEqual(LocalDate.now())) {
+            log.warn("Дата рождения не может быть в настоящем или будущем");
+            throw new ValidationException("Дата рождения не может быть в настоящем или будущем");
         }
+
     }
 }
