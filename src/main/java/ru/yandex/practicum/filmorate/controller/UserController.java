@@ -41,6 +41,10 @@ public class UserController {
     @PutMapping
     public User updateUser(@RequestBody User user) {
         log.info("Получен запрос на обновление пользователя: {}", user);
+        if (!users.containsKey(user.getId())) {
+            throw new ValidationException("Пользователь с таким id не найден");
+        }
+
         validateUser(user);
         users.put(user.getId(), user);
         log.info("Пользователь успешно обновлен: {}", user);
@@ -54,11 +58,15 @@ public class UserController {
     }
 
     private void validateUser(User user) {
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+        if (user.getName().isBlank()) {
+            log.warn("Название не может быть пустым");
+            throw new ValidationException("Название не может быть пустым");
+        }
+        if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
             log.warn("Электронная почта должна быть не пустой и содержать символ '@'");
             throw new ValidationException("Электронная почта должна быть не пустой и содержать символ '@'");
         }
-        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
             log.warn("Логин не может быть пустым и содержать пробелы");
             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
         }
