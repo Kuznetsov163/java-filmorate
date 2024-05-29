@@ -31,6 +31,9 @@ public class UserController {
             log.warn("Такой email {} уже существует", user.getEmail());
             throw new RuntimeException("Такой email уже есть");
         }
+        if (user.getName() == null || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+        }
 
         user.setId(nextId++);
         users.put(user.getId(), user);
