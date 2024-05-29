@@ -1,12 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
-
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.exceptions.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,33 +18,33 @@ public class UserController {
     private int nextId = 1;
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public User createUser(@RequestBody User user) {
         log.info("Получен запрос на создание пользователя: {}", user);
-
-
         validateUser(user);
 
+        if (users.values().stream().anyMatch(u -> u.getLogin().equals(user.getLogin()))) {
+            log.warn("Такой логин уже существует");
+            throw new ValidationException("Такой логин уже существует");
+        }
+        if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
+            log.warn("Такой email уже существует");
+            throw new ValidationException("Такой email уже существует");
+        }
 
         user.setId(nextId++);
-
-        if (users.values().stream().anyMatch(u -> u.getLogin().equalsIgnoreCase(user.getLogin()))) {
-            log.warn("Пользователь с таким логином уже существует: {}", user.getLogin());
-            return ResponseEntity.badRequest().body(null);
-        }
-        if (users.values().stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(user.getEmail()))) {
-            log.warn("Пользователь с таким email уже существует: {}", user.getEmail());
-            return ResponseEntity.badRequest().body(null);
-        }
-
         users.put(user.getId(), user);
         log.info("Пользователь успешно создан: {}", user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        return user;
     }
 
     @PutMapping
     public User updateUser(@RequestBody User user) {
         log.info("Получен запрос на обновление пользователя: {}", user);
         validateUser(user);
+        if (!users.containsKey(user.getId())) {
+            log.warn("Пользователь с таким id не найден");
+            throw new NotFoundException("Пользователь с таким id не найден");
+        }
         users.put(user.getId(), user);
         log.info("Пользователь успешно обновлен: {}", user);
         return user;
