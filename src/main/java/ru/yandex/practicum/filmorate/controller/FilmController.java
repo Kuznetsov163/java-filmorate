@@ -26,6 +26,7 @@ public class FilmController {
     public Film createFilm(@RequestBody Film film) {
         log.info("Получен запрос на создание фильма: {}", film);
         validateFilm(film);
+        film.setName(film.getName());
         film.setId(nextId++);
         films.put(film.getId(), film);
         log.info("Фильм успешно создан: {}", film);
