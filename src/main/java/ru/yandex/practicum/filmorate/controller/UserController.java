@@ -41,6 +41,9 @@ public class UserController {
     @PutMapping
     public User updateUser(@RequestBody User user) {
         log.info("Получен запрос на обновление пользователя: {}", user);
+        if (!users.containsKey(user.getId())) {
+            throw new ValidationException("Пользователь с таким id не найден");
+        }
         validateUser(user);
         users.put(user.getId(), user);
         log.info("Пользователь успешно обновлен: {}", user);

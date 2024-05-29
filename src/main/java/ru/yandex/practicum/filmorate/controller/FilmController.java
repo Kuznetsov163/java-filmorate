@@ -35,6 +35,9 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
         log.info("Получен запрос на обновление фильма: {}", film);
+        if (!films.containsKey(film.getId())) {
+            throw new ValidationException("Фильм с таким id не найден");
+        }
         validateFilm(film);
         films.put(film.getId(), film);
         log.info("Фильм успешно обновлен: {}", film);
