@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.exceptions.*;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+
 @RequestMapping("/films")
+
 @Slf4j
 public class FilmController {
     private final Map<Integer, Film> films = new HashMap<>();
@@ -34,10 +36,6 @@ public class FilmController {
     public Film updateFilm(@RequestBody Film film) {
         log.info("Получен запрос на обновление фильма: {}", film);
         validateFilm(film);
-        if (!films.containsKey(film.getId())) {
-            log.warn("Фильм с таким id не найден");
-            throw new NotFoundException("Фильм с таким id не найден");
-        }
         films.put(film.getId(), film);
         log.info("Фильм успешно обновлен: {}", film);
         return film;
@@ -50,7 +48,7 @@ public class FilmController {
     }
 
     private void validateFilm(Film film) {
-        if (film.getName().isBlank()) {
+        if (film.getName().isEmpty()) {
             log.warn("Название фильма не может быть пустым");
             throw new ValidationException("Название фильма не может быть пустым");
         }
