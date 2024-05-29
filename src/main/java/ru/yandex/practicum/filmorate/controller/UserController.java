@@ -1,8 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -11,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
@@ -19,32 +22,32 @@ public class UserController {
     private int nextId = 1;
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@RequestBody User user) {
         log.info("Получен запрос на создание пользователя: {}", user);
+
+
         validateUser(user);
 
-        if (users.values().stream().anyMatch(u -> u.getLogin().equals(user.getLogin()))) {  // проверка есть ли такой логин
-            log.warn("Такой пользователь {} уже существует", user.getLogin());
-            throw new RuntimeException("Такой пользователь уже есть");
-        }
-        if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) { // проверка есть ли такой Email
-            log.warn("Такой email {} уже существует", user.getEmail());
-            throw new RuntimeException("Такой email уже есть");
-        }
 
         user.setId(nextId++);
+
+        if (users.values().stream().anyMatch(u -> u.getLogin().equalsIgnoreCase(user.getLogin()))) {
+            log.warn("Пользователь с таким логином уже существует: {}", user.getLogin());
+            return ResponseEntity.badRequest().body(null);
+        }
+        if (users.values().stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(user.getEmail()))) {
+            log.warn("Пользователь с таким email уже существует: {}", user.getEmail());
+            return ResponseEntity.badRequest().body(null);
+        }
+
         users.put(user.getId(), user);
         log.info("Пользователь успешно создан: {}", user);
-        return user;
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @PutMapping
     public User updateUser(@RequestBody User user) {
         log.info("Получен запрос на обновление пользователя: {}", user);
-        if (!users.containsKey(user.getId())) {
-            throw new ValidationException("Пользователь с таким id не найден");
-        }
-
         validateUser(user);
         users.put(user.getId(), user);
         log.info("Пользователь успешно обновлен: {}", user);
@@ -74,6 +77,5 @@ public class UserController {
             log.warn("Дата рождения не может быть в настоящем или будущем");
             throw new ValidationException("Дата рождения не может быть в настоящем или будущем");
         }
-
     }
 }

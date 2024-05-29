@@ -27,7 +27,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    void test_Create_WithInvalidDate() {
+    void test_Create_2() {
 
         Film film = new Film();
         film.setName("Name");

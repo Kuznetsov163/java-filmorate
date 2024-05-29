@@ -13,11 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
- @RestController
+@RestController
 
- @RequestMapping("/films")
+@RequestMapping("/films")
 
- @Slf4j
+@Slf4j
 public class FilmController {
     private final Map<Integer, Film> films = new HashMap<>();
     private int nextId = 1;
@@ -35,9 +35,6 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
         log.info("Получен запрос на обновление фильма: {}", film);
-        if (!films.containsKey(film.getId())) {
-            throw new ValidationException("Фильм с таким id не найден");
-        }
         validateFilm(film);
         films.put(film.getId(), film);
         log.info("Фильм успешно обновлен: {}", film);
@@ -66,6 +63,9 @@ public class FilmController {
         if (film.getDuration() <= 0) {
             log.warn("Продолжительность фильма должна быть положительным числом");
             throw new ValidationException("Продолжительность фильма должна быть положительным числом");
+        }
+        if (!films.containsKey(film.getId())) {
+            throw new ValidationException("Фильм с таким id не найден");
         }
     }
 }
