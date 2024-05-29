@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
         assertThrows(ValidationException.class, () -> userController.createUser(user));
   }
+
     @Test
     void test_Create2() {
 
