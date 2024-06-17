@@ -3,74 +3,104 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import ru.yandex.practicum.filmorate.service.UserService;
+import jakarta.validation.Valid;
+
 
 @RestController
-
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
-    private int nextId = 1;
+
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
         log.info("Получен запрос на создание пользователя: {}", user);
-        validateUser(user);
-
-        if (users.values().stream().anyMatch(u -> u.getLogin().equals(user.getLogin()))) {  // проверка есть ли такой логин
-            log.warn("Такой пользователь {} уже существует", user.getLogin());
-            throw new RuntimeException("Такой пользователь уже есть");
+        try {
+            User createdUser = userService.create(user);
+            log.info("Пользователь успешно создан: {}", createdUser);
+            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        } catch (ValidationException e) {
+            log.warn("Ошибка валидации при создании пользователя: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            log.error("Ошибка при создании пользователя: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) { // проверка есть ли такой Email
-            log.warn("Такой email {} уже существует", user.getEmail());
-            throw new RuntimeException("Такой email уже есть");
-        }
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-
-        user.setId(nextId++);
-        users.put(user.getId(), user);
-        log.info("Пользователь успешно создан: {}", user);
-        return user;
     }
 
-    @PutMapping
-    public User updateUser(@RequestBody User user) {
-        log.info("Получен запрос на обновление пользователя: {}", user);
-        if (!users.containsKey(user.getId())) {
-            throw new ValidationException("Пользователь с таким id не найден");
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable int id) {
+        log.info("Получен запрос на получение пользователя по ID: {}", id);
+        try {
+            User user = userService.get(id);
+            log.info("Пользователь успешно получен: {}", user);
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            log.error("Ошибка при получении пользователя: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        validateUser(user);
-        users.put(user.getId(), user);
-        log.info("Пользователь успешно обновлен: {}", user);
-        return user;
     }
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        log.info("Получен запрос на получение всех пользователей");
-        return new ArrayList<>(users.values());
+    @PutMapping("/{id}/friends/{friendId}")
+    public ResponseEntity<Void> addFriend(@PathVariable int id, @PathVariable int friendId) {
+        log.info("Получен запрос на добавление друга: userId={}, friendId={}", id, friendId);
+        try {
+            userService.addFriend(id, friendId);
+            log.info("Друг успешно добавлен: userId={}, friendId={}", id, friendId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (RuntimeException e) {
+            log.error("Ошибка при добавлении друга: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    private void validateUser(User user) {
-        if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
-            log.warn("Электронная почта должна быть не пустой и содержать символ '@'");
-            throw new ValidationException("Электронная почта должна быть не пустой и содержать символ '@'");
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public ResponseEntity<Void> deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        log.info("Получен запрос на удаление друга: userId={}, friendId={}", id, friendId);
+        try {
+            userService.removeFriend(id, friendId);
+            log.info("Друг успешно удален: userId={}, friendId={}", id, friendId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (RuntimeException e) {
+            log.error("Ошибка при удалении друга: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
-            log.warn("Логин не может быть пустым и содержать пробелы");
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
+    }
+
+    @GetMapping("/{id}/friends")
+    public ResponseEntity<List<User>> getFriends(@PathVariable int id) {
+        log.info("Получен запрос на получение списка друзей: userId={}", id);
+        try {
+            List<User> friends = userService.getFriends(id);
+            log.info("Список друзей успешно получен: userId={}", id);
+            return new ResponseEntity<>(friends, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            log.error("Ошибка при получении списка друзей: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Дата рождения не может быть в будущем");
-            throw new ValidationException("Дата рождения не может быть в будущем");
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public ResponseEntity<List<User>> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        log.info("Получен запрос на получение списка общих друзей: userId={}, otherId={}", id, otherId);
+        try {
+            List<User> commonFriends = userService.getCommonFriends(id, otherId);
+            log.info("Список общих друзей успешно получен: userId={}, otherId={}", id, otherId);
+            return new ResponseEntity<>(commonFriends, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            log.error("Ошибка при получении списка общих друзей: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

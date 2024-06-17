@@ -12,6 +12,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import java.util.HashSet;
+import java.util.Set;
 
 import java.time.LocalDate;
 
@@ -33,5 +35,7 @@ import java.time.LocalDate;
 
   @Positive(message = "Продолжительность фильма должна быть положительным числом")
   private int duration;
+
+  private Set<Integer> likes = new HashSet<>();
 
 }
