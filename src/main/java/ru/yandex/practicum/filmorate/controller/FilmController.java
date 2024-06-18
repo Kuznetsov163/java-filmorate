@@ -5,17 +5,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import jakarta.validation.Valid;
-import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-
     private final FilmService filmService;
 
     @Autowired
@@ -24,32 +23,27 @@ public class FilmController {
     }
 
     @PostMapping
-    public ResponseEntity<Film> createFilm(@Valid @RequestBody Film film) {
+    public Film createFilm(@Valid @RequestBody Film film) {
         log.info("Получен запрос на создание фильма: {}", film);
-        try {
-            Film createdFilm = filmService.create(film);
-            log.info("Фильм успешно создан: {}", createdFilm);
-            return new ResponseEntity<>(createdFilm, HttpStatus.CREATED);
-        } catch (ValidationException e) {
-            log.warn("Ошибка валидации при создании фильма: {}", e.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException e) {
-            log.error("Ошибка при создании фильма: {}", e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return filmService.create(film);
+    }
+
+    @PutMapping
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        log.info("Получен запрос на обновление фильма: {}", film);
+        return filmService.update(film);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Film> getFilmById(@PathVariable int id) {
+    public Film getFilmById(@PathVariable int id) {
         log.info("Получен запрос на получение фильма по ID: {}", id);
-        try {
-            Film film = filmService.get(id);
-            log.info("Фильм успешно получен: {}", film);
-            return new ResponseEntity<>(film, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            log.error("Ошибка при получении фильма: {}", e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return filmService.get(id);
+    }
+
+    @GetMapping
+    public Set<Film> getAllFilms() {
+        log.info("Получен запрос на получение всех фильмов");
+        return filmService.getAll();
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -59,7 +53,10 @@ public class FilmController {
             filmService.addLike(id, userId);
             log.info("Лайк успешно добавлен: filmId={}, userId={}", id, userId);
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (RuntimeException e) {
+        } catch (NotFoundException e) {
+            log.error("Ошибка при добавлении лайка: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
             log.error("Ошибка при добавлении лайка: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -72,22 +69,18 @@ public class FilmController {
             filmService.removeLike(id, userId);
             log.info("Лайк успешно удален: filmId={}, userId={}", id, userId);
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (RuntimeException e) {
+        } catch (NotFoundException e) {
+            log.error("Ошибка при удалении лайка: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
             log.error("Ошибка при удалении лайка: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<List<Film>> getPopularFilms(@RequestParam(required = false, defaultValue = "10") int count) {
+    public Set<Film> getPopularFilms(@RequestParam(required = false, defaultValue = "10") int count) {
         log.info("Получен запрос на получение списка популярных фильмов: count={}", count);
-        try {
-            List<Film> popularFilms = filmService.getTopFilms(count);
-            log.info("Список популярных фильмов успешно получен: count={}", count);
-            return new ResponseEntity<>(popularFilms, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            log.error("Ошибка при получении списка популярных фильмов: {}", e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return filmService.getTopFilms(count);
     }
 }

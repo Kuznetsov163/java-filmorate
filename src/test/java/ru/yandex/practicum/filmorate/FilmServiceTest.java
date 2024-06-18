@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,7 +55,7 @@ public class FilmServiceTest {
 
         filmService.addLike(film2.getId(), user1.getId());
 
-        List<Film> topFilms = filmService.getTopFilms(2);
+        Set<Film> topFilms = filmService.getTopFilms(2);
 
         assertEquals(2, topFilms.size());
         assertTrue(topFilms.contains(film1));

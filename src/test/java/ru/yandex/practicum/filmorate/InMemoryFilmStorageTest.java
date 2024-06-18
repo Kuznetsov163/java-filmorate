@@ -2,11 +2,13 @@ package ru.yandex.practicum.filmorate;
 
 
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,17 +57,21 @@ class InMemoryFilmStorageTest {
         film.setDuration(6);
         Film createdFilm = filmStorage.create(film);
 
-        Optional<Film> foundFilm = filmStorage.get(createdFilm.getId());
+        Film foundFilm = filmStorage.get(createdFilm.getId());
 
-        assertTrue(foundFilm.isPresent());
-        assertEquals(createdFilm.getId(), foundFilm.get().getId());
+        assertNotNull(foundFilm);
+        assertEquals(createdFilm.getId(), foundFilm.getId());
+        assertEquals(createdFilm.getName(), foundFilm.getName());
+        assertEquals(createdFilm.getDescription(), foundFilm.getDescription());
+        assertEquals(createdFilm.getReleaseDate(), foundFilm.getReleaseDate());
+        assertEquals(createdFilm.getDuration(), foundFilm.getDuration());
+
     }
+
 
     @Test
     void testGetNotFound() {
-        Optional<Film> foundFilm = filmStorage.get(100);
-
-        assertFalse(foundFilm.isPresent());
+        assertThrows(NotFoundException.class, () -> filmStorage.get(100));
     }
 
     @Test
@@ -83,12 +89,14 @@ class InMemoryFilmStorageTest {
         filmStorage.create(film);
         filmStorage.create(film2);
 
-        List<Film> allFilms = filmStorage.getAll();
+        Set<Film> allFilms = filmStorage.getAll();
 
         assertEquals(2, allFilms.size());
         assertTrue(allFilms.contains(film));
         assertTrue(allFilms.contains(film2));
     }
+
+
 
     @Test
     void testRemoveLike() {
@@ -102,6 +110,9 @@ class InMemoryFilmStorageTest {
 
         filmStorage.removeLike(createdFilm.getId(), 1);
 
-        assertFalse(filmStorage.get(createdFilm.getId()).get().getLikes().contains(1));
+        Film updatedFilm = filmStorage.get(createdFilm.getId());
+        assertFalse(updatedFilm.getLikes().contains(1));
     }
+
+
 }

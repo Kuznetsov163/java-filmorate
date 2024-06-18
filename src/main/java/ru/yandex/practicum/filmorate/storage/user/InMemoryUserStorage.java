@@ -2,14 +2,13 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 
 @Component
@@ -17,8 +16,7 @@ import ru.yandex.practicum.filmorate.model.*;
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Integer, User> users = new HashMap<>();
-    private final Map<Integer, Set<Integer>> friends = new HashMap<>();
-    private int nextId = 1;
+    private int id = 0;
 
     @Override
     public User create(User user) {
@@ -34,61 +32,97 @@ public class InMemoryUserStorage implements UserStorage {
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
-        user.setId(nextId++);
+        user.setId(++id);
         users.put(user.getId(), user);
-        friends.put(user.getId(), new HashSet<>());
+        log.info("Пользователь '{}' успешно создан", user.getLogin());
         return user;
+
     }
 
     @Override
     public User update(User user) {
-        log.info("Обновление пользователя: {}", user);
+        if (!users.containsKey(user.getId())) {
+            log.warn("Пользователь с id {} не найден", user.getId());
+            throw new NotFoundException("Пользователь с таким id не найден");
+        }
         users.put(user.getId(), user);
+        log.info("Пользователь '{}' успешно обновлен", user.getLogin());
         return user;
     }
 
-    @Override
-    public Optional<User> get(int id) {
-        log.info("Получение пользователя по ID: {}", id);
-        return Optional.ofNullable(users.get(id));
-    }
 
     @Override
-    public List<User> getAll() {
-        log.info("Получение всех пользователей");
-        return new ArrayList<>(users.values());
+    public User get(int id) {
+        if (!users.containsKey(id)) {
+            log.warn("Пользователь с id {} не найден", id);
+            throw new NotFoundException("Пользователь с таким id не найден");
+        }
+        return users.get(id);
     }
+
+
+    @Override
+    public Set<User> getAll() {
+        log.info("Получение списка всех пользователей");
+        return new HashSet<>(users.values());
+    }
+
 
     @Override
     public void addFriend(int userId, int friendId) {
-        log.info("Добавление друга {} к пользователю {}", friendId, userId);
-        friends.get(userId).add(friendId);
-        friends.get(friendId).add(userId);
+        User user = users.get(userId);
+        User friend = users.get(friendId);
+        if (user == null || friend == null) {
+            log.warn("Пользователь с id {} или {} не найден", userId, friendId);
+            throw new NotFoundException("Пользователь с таким id не найден");
+        }
+        user.getFriends().add(friendId);
+        friend.getFriends().add(userId);
+        log.info("Пользователь {} добавил в друзья пользователя {}", userId, friendId);
     }
+
 
     @Override
     public void removeFriend(int userId, int friendId) {
-        log.info("Удаление друга {} от пользователя {}", friendId, userId);
-        friends.get(userId).remove(friendId);
-        friends.get(friendId).remove(userId);
+        User user = users.get(userId);
+        User friend = users.get(friendId);
+        if (user == null || friend == null) {
+            log.warn("Пользователь с id {} или {} не найден", userId, friendId);
+            throw new NotFoundException("Пользователь с таким id не найден");
+        }
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(userId);
+        log.info("Пользователь {} удалил из друзей пользователя {}", userId, friendId);
     }
 
-    @Override
-    public List<User> getFriends(int userId) {
-        log.info("Получение списка друзей пользователя {}", userId);
-        return friends.get(userId).stream()
-                .map(users::get)
-                .collect(Collectors.toList());
-    }
 
     @Override
-    public List<User> getCommonFriends(int userId, int otherId) {
-        log.info("Получение списка общих друзей пользователей {} и {}", userId, otherId);
-        Set<Integer> userFriends = friends.get(userId);
-        Set<Integer> otherFriends = friends.get(otherId);
-        return userFriends.stream()
-                .filter(otherFriends::contains)
+    public Set<User> getFriends(int userId) {
+        User user = users.get(userId);
+        if (user == null) {
+            log.warn("Пользователь с id {} не найден", userId);
+            throw new NotFoundException("Пользователь с таким id не найден");
+        }
+        log.info("Список друзей пользователя ");
+        return user.getFriends().stream()
                 .map(users::get)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
+    }
+
+
+    @Override
+    public Set<User> getCommonFriends(int userId, int otherId) {
+        User user = users.get(userId);
+        User other = users.get(otherId);
+        if (user == null || other == null) {
+            log.warn("Пользователь с id {} или {} не найден", userId, otherId);
+            throw new NotFoundException("Пользователь с таким id не найден");
+        }
+        Set<Integer> commonFriends = new HashSet<>(user.getFriends());
+        commonFriends.retainAll(other.getFriends());
+        log.info("Список общих друзей пользователей");
+        return commonFriends.stream()
+                .map(users::get)
+                .collect(Collectors.toSet());
     }
 }
