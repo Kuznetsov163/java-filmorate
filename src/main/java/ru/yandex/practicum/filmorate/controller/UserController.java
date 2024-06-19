@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import ru.yandex.practicum.filmorate.service.UserService;
-import jakarta.validation.Valid;
+
 
 
 @RestController
@@ -24,13 +24,13 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@Valid @RequestBody User user) {
+    public User createUser(@RequestBody User user) {
         log.info("Получен запрос на создание пользователя: {}", user);
         return userService.create(user);
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
+    public User updateUser(@RequestBody User user) {
         log.info("Получен запрос на обновление пользователя: {}", user);
         return userService.update(user);
     }
