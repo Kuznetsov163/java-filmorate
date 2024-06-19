@@ -17,7 +17,7 @@ import java.util.Set;
 
 public class User {
 
-     private Integer id;
+     private int id;
 
 
     private String email;
