@@ -20,20 +20,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User create(User user) {
-        log.info("Создание нового пользователя: {}", user);
-        if (users.values().stream().anyMatch(u -> u.getLogin().equals(user.getLogin()))) {  // проверка есть ли такой логин
-            log.warn("Такой пользователь {} уже существует", user.getLogin());
-            throw new NotFoundException("Такой пользователь уже есть");
-        }
-        if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) { // проверка есть ли такой Email
-            log.warn("Такой email {} уже существует", user.getEmail());
-            throw new NotFoundException("Такой email уже есть");
-        }
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-
-
         user.setId(id++);
         users.put(user.getId(), user);
         log.info("Пользователь '{}' успешно создан", user.getLogin());

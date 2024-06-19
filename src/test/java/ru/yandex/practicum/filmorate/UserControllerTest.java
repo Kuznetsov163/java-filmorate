@@ -84,6 +84,7 @@ public class UserControllerTest {
         User createdUser = userController.create(user);
         user.setName("New Name");
 
+
         User updatedUser = userController.update(user);
 
         assertEquals(createdUser.getId(), updatedUser.getId());
