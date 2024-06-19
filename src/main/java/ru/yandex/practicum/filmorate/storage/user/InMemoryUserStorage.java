@@ -20,9 +20,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User create(User user) {
-        user.setId(id);
+        user.setId(id++);
         users.put(user.getId(), user);
-        id++;
         log.info("Пользователь '{}' успешно создан", user.getLogin());
         return user;
 
@@ -46,7 +45,6 @@ public class InMemoryUserStorage implements UserStorage {
             log.warn("Пользователь с id {} не найден", id);
             throw new NotFoundException("Пользователь с таким id не найден");
         }
-
         return users.get(id);
     }
 
@@ -54,7 +52,13 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public Set<User> getAll() {
         log.info("Получение списка всех пользователей");
-        return new HashSet<>(users.values());
+        return users.entrySet().stream()
+                .map(entry -> {
+                    User user = entry.getValue();
+                    user.setId(entry.getKey());
+                    return user;
+                })
+                .collect(Collectors.toSet());
     }
 
 
@@ -76,8 +80,12 @@ public class InMemoryUserStorage implements UserStorage {
     public void removeFriend(int userId, int friendId) {
         User user = users.get(userId);
         User friend = users.get(friendId);
-        if (user == null || friend == null) {
-            log.warn("Пользователь с id {} или {} не найден", userId, friendId);
+        if (user == null) {
+            log.warn("Пользователь с id {} или {} не найден", userId);
+            throw new NotFoundException("Пользователь с таким id не найден");
+        }
+        if (friend == null) {
+            log.warn("Пользователь с id {} или {} не найден", friendId);
             throw new NotFoundException("Пользователь с таким id не найден");
         }
         user.getFriends().remove(friendId);
@@ -99,18 +107,22 @@ public class InMemoryUserStorage implements UserStorage {
                 .collect(Collectors.toSet());
     }
 
-
     @Override
     public Set<User> getCommonFriends(int userId, int otherId) {
         User user = users.get(userId);
         User other = users.get(otherId);
-        if (user == null || other == null) {
+        if (user == null) {
             log.warn("Пользователь с id {} или {} не найден", userId, otherId);
             throw new NotFoundException("Пользователь с таким id не найден");
         }
+        if (other == null) {
+            log.warn("Пользователь с id {} или {} не найден", otherId);
+            throw new NotFoundException("Пользователь с таким id не найден");
+        }
+
         Set<Integer> commonFriends = new HashSet<>(user.getFriends());
         commonFriends.retainAll(other.getFriends());
-        log.info("Список общих друзей пользователей");
+        log.info("Список общих друзей пользователей {} и {}", user.getName(), other.getName());
         return commonFriends.stream()
                 .map(users::get)
                 .collect(Collectors.toSet());

@@ -27,6 +27,10 @@ public class UserService {
     public User create(User user) {
         validateUser(user);
         log.info("Создание нового пользователя: {}", user);
+        if (users.containsKey(user.getId())) {
+            log.warn("Пользователь с таким ID {} уже существует", user.getId());
+            throw new NotFoundException("Пользователь с таким ID уже есть");
+        }
         if (users.values().stream().anyMatch(u -> u.getLogin().equals(user.getLogin()))) {  // проверка есть ли такой логин
             log.warn("Такой пользователь {} уже существует", user.getLogin());
             throw new NotFoundException("Такой пользователь уже есть");

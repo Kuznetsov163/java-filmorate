@@ -80,18 +80,25 @@ class InMemoryFilmStorageTest {
         film.setReleaseDate(LocalDate.parse("1896-10-10"));
         film.setDuration(6);
         Film film2 = new Film();
-        film.setName("Name2");
-        film.setDescription("Description2");
-        film.setReleaseDate(LocalDate.parse("1896-10-14"));
-        film.setDuration(6);
+        film2.setName("Name2");
+        film2.setDescription("Description2");
+        film2.setReleaseDate(LocalDate.parse("1896-10-14"));
+        film2.setDuration(6);
+        Film film3 = new Film();
+        film3.setName("Na");
+        film3.setDescription("Descri");
+        film3.setReleaseDate(LocalDate.parse("1899-10-14"));
+        film3.setDuration(888);
         filmStorage.create(film);
         filmStorage.create(film2);
+        filmStorage.create(film3);
 
         Set<Film> allFilms = filmStorage.getAll();
 
-        assertEquals(2, allFilms.size());
+        assertEquals(3, allFilms.size());
         assertTrue(allFilms.contains(film));
         assertTrue(allFilms.contains(film2));
+        assertTrue(allFilms.contains(film3));
     }
 
 
