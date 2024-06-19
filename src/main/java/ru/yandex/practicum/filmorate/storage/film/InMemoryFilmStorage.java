@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Integer, Film> films = new HashMap<>();
+    private final Map<Integer, User> users = new HashMap<>();
     private int id = 1;
 
 
@@ -58,8 +59,8 @@ public class InMemoryFilmStorage implements FilmStorage {
 
 
     public void addLike(int filmId, int userId) {
-        if (!films.containsKey(filmId)) {
-            log.warn("Фильм с id {} не найден", filmId);
+        if (!films.containsKey(filmId) || !users.containsKey(userId)) {
+            log.warn("Фильм с id {} не найден", filmId, userId);
             throw new NotFoundException("Фильм с таким id не найден");
         }
         films.get(filmId).getLikes().add(userId);
@@ -70,10 +71,12 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void removeLike(int filmId, int userId) {
-        if (!films.containsKey(filmId)) {
-            log.warn("Фильм с id {} не найден", filmId);
+        if (!films.containsKey(filmId) || !users.containsKey(userId)) {
+            log.warn("Фильм с id {} не найден", filmId,  userId);
             throw new NotFoundException("Фильм с таким id не найден");
         }
+
+
         films.get(filmId).getLikes().remove(userId);
         log.info("Пользователь {} убрал лайк с фильма {}", userId, filmId);
     }

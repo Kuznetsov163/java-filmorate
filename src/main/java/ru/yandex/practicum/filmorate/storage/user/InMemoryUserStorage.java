@@ -16,22 +16,28 @@ import ru.yandex.practicum.filmorate.model.*;
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Integer, User> users = new HashMap<>();
-    private int id = 0;
+    private int id = 1;
 
     @Override
     public User create(User user) {
         log.info("Создание нового пользователя: {}", user);
         if (users.values().stream().anyMatch(u -> u.getLogin().equals(user.getLogin()))) {  // проверка есть ли такой логин
             log.warn("Такой пользователь {} уже существует", user.getLogin());
-            throw new RuntimeException("Такой пользователь уже есть");
+            throw new NotFoundException("Такой пользователь уже есть");
         }
         if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) { // проверка есть ли такой Email
             log.warn("Такой email {} уже существует", user.getEmail());
-            throw new RuntimeException("Такой email уже есть");
+            throw new NotFoundException("Такой email уже есть");
         }
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
+
+        if (!users.containsKey(user.getId())) {
+            log.warn("Пользователь с id {} не найден", user.getId());
+            throw new NotFoundException("Пользователь с таким id не найден");
+        }
+
         user.setId(++id);
         users.put(user.getId(), user);
         log.info("Пользователь '{}' успешно создан", user.getLogin());
