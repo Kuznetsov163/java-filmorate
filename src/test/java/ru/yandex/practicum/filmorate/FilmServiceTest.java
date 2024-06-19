@@ -36,16 +36,20 @@ public class FilmServiceTest {
         film2 = filmService.create(film2);
 
         User user1 = new User();
+        user1.setId(1);
         user1.setEmail("@.ruuu");
         user1.setName("Name2");
         user1.setLogin("gghh");
         user1.setBirthday(LocalDate.parse("1988-01-01"));
 
+
         User user2 = new User();
+        user2.setId(2);
         user2.setEmail("@.ru");
         user2.setName("Name");
         user2.setLogin("gg");
         user2.setBirthday(LocalDate.parse("1900-01-01"));
+
         user1 = userService.create(user1);
         user2 = userService.create(user2);
 

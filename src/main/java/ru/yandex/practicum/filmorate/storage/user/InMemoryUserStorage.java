@@ -33,12 +33,8 @@ public class InMemoryUserStorage implements UserStorage {
             user.setName(user.getLogin());
         }
 
-        if (!users.containsKey(user.getId())) {
-            log.warn("Пользователь с id {} не найден", user.getId());
-            throw new NotFoundException("Пользователь с таким id не найден");
-        }
 
-        user.setId(++id);
+        user.setId(id++);
         users.put(user.getId(), user);
         log.info("Пользователь '{}' успешно создан", user.getLogin());
         return user;
@@ -63,6 +59,7 @@ public class InMemoryUserStorage implements UserStorage {
             log.warn("Пользователь с id {} не найден", id);
             throw new NotFoundException("Пользователь с таким id не найден");
         }
+
         return users.get(id);
     }
 
