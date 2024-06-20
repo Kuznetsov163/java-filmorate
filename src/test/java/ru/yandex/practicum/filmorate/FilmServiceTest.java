@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
@@ -65,5 +66,31 @@ public class FilmServiceTest {
         assertEquals(2, topFilms.size());
         assertTrue(topFilms.contains(film1));
         assertTrue(topFilms.contains(film2));
+    }
+
+    @Test
+    void testRemoveFriend() {
+
+        User user1 = new User();
+        user1.setId(1);
+        user1.setEmail("@.ru");
+        user1.setName("Name");
+        user1.setLogin("gg");
+        user1.setBirthday(LocalDate.parse("1900-01-01"));
+        userService.create(user1);
+
+        User user2 = new User();
+        user2.setId(2);
+        user2.setEmail("@.rгu");
+        user2.setName("Nae");
+        user2.setLogin("g");
+        user2.setBirthday(LocalDate.parse("1901-01-01"));
+        userService.create(user2);
+
+
+        userService.addFriend(1, 2);
+
+
+        assertThrows(NotFoundException.class, () -> userService.removeFriend(1, 999));
     }
 }

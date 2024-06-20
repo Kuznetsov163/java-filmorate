@@ -79,6 +79,10 @@ public class UserService {
 
 
     private void validateUser(User user) {
+        if (user.getId() <= 0) {
+            log.warn("id не может быть меньше 0 или 0");
+            throw new ValidationException("id меньше 0  или 0");
+        }
         if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
             log.warn("Электронная почта должна быть не пустой и содержать символ '@'");
             throw new ValidationException("Электронная почта должна быть не пустой и содержать символ '@'");

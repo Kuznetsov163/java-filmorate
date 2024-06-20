@@ -85,13 +85,14 @@ public class InMemoryUserStorage implements UserStorage {
         User user = users.get(userId);
         if (user == null) {
             log.warn("Пользователь с id {} не найден", userId);
-            throw new NotFoundException("Пользователь с таким id не найден");
+            throw new NotFoundException("Пользователь с таким id, не найден");
         }
         User friend = users.get(friendId);
         if (friend == null) {
             log.warn("Пользователь с id {} не найден", friendId);
-            throw new NotFoundException("Пользователь с таким id не найден");
+            throw new NotFoundException("Пользователь с таким id, не найден");
         }
+
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
         log.info("Пользователь {} удалил из друзей пользователя {}", userId, friendId);

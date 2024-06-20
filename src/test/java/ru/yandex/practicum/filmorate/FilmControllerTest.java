@@ -17,6 +17,7 @@ public class FilmControllerTest {
 
 
         Film film = new Film();
+        film.setId(1);
         film.setName("");
         film.setDescription("Description");
         film.setDuration(1000);
@@ -30,6 +31,7 @@ public class FilmControllerTest {
     void test_Create_2() {
 
         Film film = new Film();
+        film.setId(1);
         film.setName("Name");
         film.setDescription("Description");
         film.setDuration(1000);
@@ -41,6 +43,7 @@ public class FilmControllerTest {
     @Test // Продолжительность фильма 0
     void test_Create_3() {
         Film film = new Film();
+        film.setId(1);
         film.setName("Name");
         film.setDescription("Description");
         film.setReleaseDate(LocalDate.parse("1896-10-10"));
@@ -52,6 +55,7 @@ public class FilmControllerTest {
     @Test // Продолжительность фильма отрицательная
     void test_Create_4() {
         Film film = new Film();
+        film.setId(1);
         film.setName("Name");
         film.setDescription("Description");
         film.setReleaseDate(LocalDate.parse("1896-10-10"));
@@ -63,8 +67,20 @@ public class FilmControllerTest {
     @Test // Больше 200 символов
     void test_Create_5() {
         Film film = new Film();
+        film.setId(1);
         film.setName("Name");
         film.setDescription("D".repeat(201));
+        film.setReleaseDate(LocalDate.parse("1896-10-10"));
+        film.setDuration(1000);
+
+        assertThrows(ValidationException.class, () -> filmController.create(film));
+    }
+    @Test
+    void test_Create9() {
+        Film film = new Film();
+        film.setId(0);
+        film.setName("Name");
+        film.setDescription("D");
         film.setReleaseDate(LocalDate.parse("1896-10-10"));
         film.setDuration(1000);
 

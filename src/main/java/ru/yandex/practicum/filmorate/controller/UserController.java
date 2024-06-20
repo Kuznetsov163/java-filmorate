@@ -55,7 +55,7 @@ public class UserController {
             log.info("Друг успешно добавлен: userId={}, friendId={}", id, friendId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NotFoundException e) {
-            log.error("Ошибка при добавлении друга: {}", e.getMessage());
+            log.warn("Ошибка при добавлении друга: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             log.error("Ошибка при добавлении друга: {}", e.getMessage());
@@ -71,7 +71,7 @@ public class UserController {
             log.info("Друг успешно удален: userId={}, friendId={}", id, friendId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NotFoundException e) {
-            log.error("Ошибка при удалении друга: {}", e.getMessage());
+            log.warn("Ошибка при удалении друга: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             log.error("Ошибка при удалении друга: {}", e.getMessage());

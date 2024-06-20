@@ -21,6 +21,7 @@ public class UserControllerTest {
     void test_Create() {
 
         User user = new User();
+        user.setId(1);
         user.setEmail("@.ru");
         user.setName("Name");
         user.setLogin("");
@@ -33,6 +34,7 @@ public class UserControllerTest {
     void test_Create2() {
 
         User user = new User();
+        user.setId(1);
         user.setEmail("");
         user.setName("Name");
         user.setLogin("g");
@@ -44,6 +46,7 @@ public class UserControllerTest {
     @Test  //  Email без @
     void test_Create3() {
         User user = new User();
+        user.setId(1);
         user.setEmail(".ru");
         user.setName("Name");
         user.setLogin("g");
@@ -55,6 +58,7 @@ public class UserControllerTest {
     @Test  // Содержание пробелов в login
     void test_Create4() {
         User user = new User();
+        user.setId(1);
         user.setEmail("@.ru");
         user.setName("Name");
         user.setLogin("g g");
@@ -66,6 +70,7 @@ public class UserControllerTest {
     @Test  // Дата рождения в будующем
     void test_Create5() {
         User user = new User();
+        user.setId(1);
         user.setEmail("@.ru");
         user.setName("Name");
         user.setLogin("g");
@@ -124,7 +129,7 @@ public class UserControllerTest {
 
         User friend = new User();
         friend.setId(2);
-        friend.setEmail("friend@.ru");
+        friend.setEmail("@.ru");
         friend.setName("Friend");
         friend.setLogin("friend");
         friend.setBirthday(LocalDate.parse("1900-01-02"));
@@ -141,4 +146,5 @@ public class UserControllerTest {
         assertFalse(foundUser.getFriends().isEmpty());
         assertTrue(foundUser.getFriends().contains(friend.getId()));
     }
+
 }
