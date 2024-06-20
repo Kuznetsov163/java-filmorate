@@ -57,6 +57,9 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .map(entry -> {
                     Film film = entry.getValue();
                     film.setId(entry.getKey());
+                    if (film.getId() == 0) {
+                        log.warn("Фильм с названием '{}' имеет ID = 0", film.getName());
+                    }
                     return film;
                 })
                 .collect(Collectors.toSet());

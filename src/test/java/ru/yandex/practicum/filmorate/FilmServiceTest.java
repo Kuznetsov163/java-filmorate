@@ -22,12 +22,14 @@ public class FilmServiceTest {
     @Test
     void testGetTopFilms() {
         Film film1 = new Film();
+        film1.setId(1);
         film1.setName("Name");
         film1.setDescription("Description");
         film1.setReleaseDate(LocalDate.parse("1896-10-10"));
         film1.setDuration(100);
 
         Film film2 = new Film();
+        film2.setId(2);
         film2.setName("Name1");
         film2.setDescription("Description1");
         film2.setReleaseDate(LocalDate.parse("1899-10-10"));

@@ -65,11 +65,11 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void addFriend(int userId, int friendId) {
         User user = users.get(userId);
-        User friend = users.get(friendId);
         if (user == null) {
             log.warn("Пользователь с id {} не найден", userId);
             throw new NotFoundException("Пользователь с таким id не найден");
         }
+        User friend = users.get(friendId);
         if (friend == null) {
             log.warn("Пользователь с id {} не найден", friendId);
             throw new NotFoundException("Пользователь с таким id не найден");
@@ -83,11 +83,11 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void removeFriend(int userId, int friendId) {
         User user = users.get(userId);
-        User friend = users.get(friendId);
         if (user == null) {
             log.warn("Пользователь с id {} не найден", userId);
             throw new NotFoundException("Пользователь с таким id не найден");
         }
+        User friend = users.get(friendId);
         if (friend == null) {
             log.warn("Пользователь с id {} не найден", friendId);
             throw new NotFoundException("Пользователь с таким id не найден");
