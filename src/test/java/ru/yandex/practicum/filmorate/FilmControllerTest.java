@@ -75,16 +75,4 @@ public class FilmControllerTest {
 
         assertThrows(ValidationException.class, () -> filmController.create(film));
     }
-
-    @Test
-    void test_Create9() {
-        Film film = new Film();
-        film.setId(0);
-        film.setName("Name");
-        film.setDescription("D");
-        film.setReleaseDate(LocalDate.parse("1896-10-10"));
-        film.setDuration(1000);
-
-        assertThrows(ValidationException.class, () -> filmController.create(film));
-    }
 }

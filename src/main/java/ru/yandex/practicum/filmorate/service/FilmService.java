@@ -51,10 +51,6 @@ public class FilmService {
     }
 
     private void validateFilm(Film film) {
-        if (film.getId() <= 0) {
-            log.warn("id не может быть меньше 0 или 0");
-            throw new ValidationException("id меньше 0  или 0");
-        }
         if (film.getName().isEmpty()) {
             log.warn("Название фильма не может быть пустым");
             throw new ValidationException("Название фильма не может быть пустым");
