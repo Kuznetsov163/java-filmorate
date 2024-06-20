@@ -66,8 +66,12 @@ public class InMemoryUserStorage implements UserStorage {
     public void addFriend(int userId, int friendId) {
         User user = users.get(userId);
         User friend = users.get(friendId);
-        if (user == null || friend == null) {
-            log.warn("Пользователь с id {} или {} не найден", userId, friendId);
+        if (user == null) {
+            log.warn("Пользователь с id {} не найден", userId);
+            throw new NotFoundException("Пользователь с таким id не найден");
+        }
+        if (friend == null) {
+            log.warn("Пользователь с id {} не найден", friendId);
             throw new NotFoundException("Пользователь с таким id не найден");
         }
         user.getFriends().add(friendId);
@@ -81,11 +85,11 @@ public class InMemoryUserStorage implements UserStorage {
         User user = users.get(userId);
         User friend = users.get(friendId);
         if (user == null) {
-            log.warn("Пользователь с id {} или {} не найден", userId);
+            log.warn("Пользователь с id {} не найден", userId);
             throw new NotFoundException("Пользователь с таким id не найден");
         }
         if (friend == null) {
-            log.warn("Пользователь с id {} или {} не найден", friendId);
+            log.warn("Пользователь с id {} не найден", friendId);
             throw new NotFoundException("Пользователь с таким id не найден");
         }
         user.getFriends().remove(friendId);
@@ -112,11 +116,11 @@ public class InMemoryUserStorage implements UserStorage {
         User user = users.get(userId);
         User other = users.get(otherId);
         if (user == null) {
-            log.warn("Пользователь с id {} или {} не найден", userId, otherId);
+            log.warn("Пользователь с id {} не найден", userId);
             throw new NotFoundException("Пользователь с таким id не найден");
         }
         if (other == null) {
-            log.warn("Пользователь с id {} или {} не найден", otherId);
+            log.warn("Пользователь с id {} не найден", otherId);
             throw new NotFoundException("Пользователь с таким id не найден");
         }
 

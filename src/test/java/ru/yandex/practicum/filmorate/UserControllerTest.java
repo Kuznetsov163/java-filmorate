@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -76,6 +77,7 @@ public class UserControllerTest {
     @Test // Обновление пользователя
     void test_Update() {
         User user = new User();
+        user.setId(1);
         user.setEmail("@.ru");
         user.setName("Name");
         user.setLogin("gg");
@@ -83,6 +85,7 @@ public class UserControllerTest {
 
         User createdUser = userController.create(user);
         user.setName("New Name");
+
 
 
         User updatedUser = userController.update(user);
@@ -94,6 +97,7 @@ public class UserControllerTest {
     @Test // Получение пользователя по ID
     void test_Get() {
         User user = new User();
+        user.setId(1);
         user.setEmail("@.ru");
         user.setName("Name");
         user.setLogin("gg");
@@ -104,5 +108,37 @@ public class UserControllerTest {
 
         assertNotNull(foundUser);
         assertEquals(createdUser.getId(), foundUser.getId());
+    }
+
+    @Test // // Проверяю, что друг добавлен в список друзей
+    void testGet() {
+        User user = new User();
+        user.setId(1);
+        user.setEmail("@.ru");
+        user.setName("Name");
+        user.setLogin("gg");
+        user.setBirthday(LocalDate.parse("1900-01-01"));
+        user.setFriends(new HashSet<>());
+
+        User createdUser = userController.create(user);
+
+        User friend = new User();
+        friend.setId(2);
+        friend.setEmail("friend@.ru");
+        friend.setName("Friend");
+        friend.setLogin("friend");
+        friend.setBirthday(LocalDate.parse("1900-01-02"));
+        friend.setFriends(new HashSet<>());
+        userController.create(friend);
+
+        userController.addFriend(createdUser.getId(), friend.getId());
+
+        User foundUser = userController.get(createdUser.getId());
+
+        assertNotNull(foundUser);
+        assertEquals(createdUser.getId(), foundUser.getId());
+
+        assertFalse(foundUser.getFriends().isEmpty());
+        assertTrue(foundUser.getFriends().contains(friend.getId()));
     }
 }
