@@ -52,13 +52,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public Set<User> getAll() {
         log.info("Получение списка всех пользователей");
-        return users.entrySet().stream()
-                .map(entry -> {
-                    User user = entry.getValue();
-                    user.setId(entry.getKey());
-                    return user;
-                })
-                .collect(Collectors.toSet());
+        return new HashSet<>(users.values());
     }
 
 
