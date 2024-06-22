@@ -1,76 +1,93 @@
 package ru.yandex.practicum.filmorate.controller;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import java.util.Set;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import ru.yandex.practicum.filmorate.service.UserService;
+
+
 
 @RestController
-
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
-    private int nextId = 1;
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping
     public User createUser(@RequestBody User user) {
         log.info("Получен запрос на создание пользователя: {}", user);
-        validateUser(user);
-
-        if (users.values().stream().anyMatch(u -> u.getLogin().equals(user.getLogin()))) {  // проверка есть ли такой логин
-            log.warn("Такой пользователь {} уже существует", user.getLogin());
-            throw new RuntimeException("Такой пользователь уже есть");
-        }
-        if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) { // проверка есть ли такой Email
-            log.warn("Такой email {} уже существует", user.getEmail());
-            throw new RuntimeException("Такой email уже есть");
-        }
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-
-        user.setId(nextId++);
-        users.put(user.getId(), user);
-        log.info("Пользователь успешно создан: {}", user);
-        return user;
+        return userService.create(user);
     }
 
     @PutMapping
     public User updateUser(@RequestBody User user) {
         log.info("Получен запрос на обновление пользователя: {}", user);
-        if (!users.containsKey(user.getId())) {
-            throw new ValidationException("Пользователь с таким id не найден");
-        }
-        validateUser(user);
-        users.put(user.getId(), user);
-        log.info("Пользователь успешно обновлен: {}", user);
-        return user;
+        return userService.update(user);
+    }
+
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable int id) {
+        log.info("Получен запрос на получение пользователя с id {}", id);
+        return userService.get(id);
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
+    public Set<User> getAllUsers() {
         log.info("Получен запрос на получение всех пользователей");
-        return new ArrayList<>(users.values());
+        return userService.getAll();
     }
 
-    private void validateUser(User user) {
-        if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
-            log.warn("Электронная почта должна быть не пустой и содержать символ '@'");
-            throw new ValidationException("Электронная почта должна быть не пустой и содержать символ '@'");
+    @PutMapping("/{id}/friends/{friendId}")
+    public ResponseEntity<String> addFriend(@PathVariable int id, @PathVariable int friendId) {
+        log.info("Получен запрос на добавление друга: userId={}, friendId={}", id, friendId);
+        try {
+            userService.addFriend(id, friendId);
+            log.info("Друг успешно добавлен: userId={}, friendId={}", id, friendId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NotFoundException e) {
+            log.error("Ошибка при добавлении друга: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\":\"Пользователь с таким id не найден\"}");
+        } catch (Exception e) {
+            log.error("Ошибка при добавлении друга: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
-            log.warn("Логин не может быть пустым и содержать пробелы");
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public ResponseEntity<String> deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        log.info("Получен запрос на удаление друга: userId={}, friendId={}", id, friendId);
+        try {
+            userService.removeFriend(id, friendId);
+            log.info("Друг успешно удален: userId={}, friendId={}", id, friendId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NotFoundException e) {
+            log.error("Ошибка при удалении друга: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\":\"Пользователь с таким id не найден\"}");
+        } catch (Exception e) {
+            log.error("Ошибка при удалении друга: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Дата рождения не может быть в будущем");
-            throw new ValidationException("Дата рождения не может быть в будущем");
-        }
+    }
+
+    @GetMapping("/{id}/friends")
+    public Set<User> getUserFriends(@PathVariable int id) {
+        log.info("Получен запрос на получение друзей пользователя с id {}", id);
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Set<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        log.info("Получен запрос на получение общих друзей пользователей {} и {}", id, otherId);
+        return userService.getCommonFriends(id, otherId);
     }
 }
