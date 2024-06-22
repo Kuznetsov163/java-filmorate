@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,16 +54,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Set<Film> getAll() {
         log.info("Получение списка всех фильмов");
-        return films.entrySet().stream()
-                .map(entry -> {
-                    Film film = entry.getValue();
-                    film.setId(entry.getKey());
-                    if (film.getId() == 0) {
-                        log.warn("Фильм с названием '{}' имеет ID = 0", film.getName());
-                    }
-                    return film;
-                })
-                .collect(Collectors.toSet());
+        return new HashSet<>(films.values());
     }
 
 

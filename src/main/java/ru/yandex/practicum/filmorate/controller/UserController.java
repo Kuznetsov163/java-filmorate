@@ -48,7 +48,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<Void> addFriend(@PathVariable int id, @PathVariable int friendId) {
+    public ResponseEntity<String> addFriend(@PathVariable int id, @PathVariable int friendId) {
         log.info("Получен запрос на добавление друга: userId={}, friendId={}", id, friendId);
         try {
             userService.addFriend(id, friendId);
@@ -56,7 +56,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NotFoundException e) {
             log.error("Ошибка при добавлении друга: {}", e.getMessage());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\":\"Пользователь с таким id не найден\"}");
         } catch (Exception e) {
             log.error("Ошибка при добавлении друга: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -64,7 +64,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<Void> deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+    public ResponseEntity<String> deleteFriend(@PathVariable int id, @PathVariable int friendId) {
         log.info("Получен запрос на удаление друга: userId={}, friendId={}", id, friendId);
         try {
             userService.removeFriend(id, friendId);
@@ -72,7 +72,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NotFoundException e) {
             log.error("Ошибка при удалении друга: {}", e.getMessage());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\":\"Пользователь с таким id не найден\"}");
         } catch (Exception e) {
             log.error("Ошибка при удалении друга: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
