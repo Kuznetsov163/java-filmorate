@@ -7,28 +7,39 @@ package ru.yandex.practicum.filmorate.model;
 имя для отображения — name;
 дата рождения — birthday.
  */
-
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
  @Data
+ @Slf4j
+ @Getter
+ @Setter
+ @Builder(toBuilder = true)
+   public class User {
 
-public class User {
+     @NotNull(message = "id пользователя не может быть пустым")
+     private long id;
 
-     private Integer id;
+     @NotNull(message = "Email не может быть пустым")
+     private String email;
 
-    private String email;
+     @NotNull(message = "Логин не может быть пустым")
+     private String login;
 
+     @NotNull(message = "Имя пользователя не может быть пустым")
+     private String name;
 
-    private String login;
+     @NotNull(message = "Дата рождения пользователя не может быть пустой")
+     private LocalDate birthday;
 
-    private String name;
-
-
-    private LocalDate birthday;
-
-    private Set<Integer> friends = new HashSet<>();
+     @NotNull(message = "Список друзей пользователя не может быть пустым")
+     private Set<Long> friends = new HashSet<>();
 
 }

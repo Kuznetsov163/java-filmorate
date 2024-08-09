@@ -1,85 +1,110 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Set;
 
 
 @Service
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
-    private final Map<Integer, User> users = new HashMap<>();
 
-    @Autowired
     public UserService(UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
-    public User create(User user) {
+    public User createUser(User user) {
         validateUser(user);
-        log.info("Создание нового пользователя: {}", user);
-        if (users.containsKey(user.getId())) {
-            log.warn("Пользователь с таким ID {} уже существует", user.getId());
-            throw new NotFoundException("Пользователь с таким ID уже есть");
-        }
-        if (users.values().stream().anyMatch(u -> u.getLogin().equals(user.getLogin()))) {  // проверка есть ли такой логин
-            log.warn("Такой пользователь {} уже существует", user.getLogin());
-            throw new NotFoundException("Такой пользователь уже есть");
-        }
-        if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) { // проверка есть ли такой Email
-            log.warn("Такой email {} уже существует", user.getEmail());
-            throw new NotFoundException("Такой email уже есть");
-        }
-        if (user.getName() == null || user.getName().isEmpty()) {
+        log.info("Получен запрос на создание пользователя: {}", user);
+        if (user.getName() == null) {
             user.setName(user.getLogin());
         }
+        user = userStorage.createUser(user);
+        log.info("Пользователь '{}' успешно создан.", user);
 
-
-        return userStorage.create(user);
+        return user;
     }
 
-    public User update(User user) {
+    public User updateUser(User user) {
+
+        if (user.getId() == 0) {
+            throw new ValidationException("Id фильма должен быть указан");
+        }
         validateUser(user);
-        return userStorage.update(user);
+        get(user.getId());
+        log.info("Получен запрос на обновление пользователя: {}", user);
+        User usUp = userStorage.getUserId(user.getId()).get();
+        usUp = usUp.toBuilder()
+                .login(user.getLogin())
+                .email(user.getEmail())
+                .birthday(user.getBirthday())
+                .name(user.getName())
+                .build();
+        userStorage.updateUser(usUp);
+        log.info("Пользователь '{}' успешно обновлен", user);
+
+        return user;
     }
 
-    public User get(int id) {
-        return userStorage.get(id);
+
+    public Collection<User> getAllUser() {
+        log.info("Получен запрос на получение всех пользователей");
+
+        return userStorage.getAllUser();
     }
 
-    public Set<User> getAll() {
-        return userStorage.getAll();
+    public void get(long id) {
+        if (userStorage.getUserId(id).isEmpty()) {
+            log.warn("Пользователь с ID {} не найден", id);
+            throw new NotFoundException("Пользователь с id = " + id + " не найден");
+        }
     }
 
-    public void addFriend(int userId, int friendId) {
+
+
+    public void addFriend(long userId, long friendId) {
+        log.info("Получен запрос на добавление друга: userId={}, friendId={}", userId, friendId);
+        get(userId);
+        get(friendId);
         userStorage.addFriend(userId, friendId);
+        userStorage.addFriend(friendId, userId);
+        log.info("Друг успешно добавлен: userId={}, friendId={}", userId, friendId);
     }
 
-    public void removeFriend(int userId, int friendId) {
+    public void removeFriend(long userId, long friendId) {
+        log.info("Получен запрос на удаление друга: userId={}, friendId={}", userId, friendId);
+        get(userId);
+        get(friendId);
         userStorage.removeFriend(userId, friendId);
+        userStorage.removeFriend(friendId, userId);
+        log.info("Друг успешно удален: userId={}, friendId={}", userId, friendId);
+
     }
 
-    public Set<User> getFriends(int userId) {
-        return userStorage.getFriends(userId);
+    public Set<User> getFriends(long id) {
+        log.info("Получен запрос на получение друзей пользователя с id {}", id);
+        get(id);
+        return userStorage.getFriends(id);
     }
 
-    public Set<User> getCommonFriends(int userId, int otherId) {
-        return userStorage.getCommonFriends(userId, otherId);
+    public Set<User> getCommonFriends(long id, long otherId) {
+        log.info("Получен запрос на получение общих друзей пользователей {} и {}", id, otherId);
+        get(id);
+        get(otherId);
+        return userStorage.getCommonFriends(id, otherId);
     }
 
 
 
     private void validateUser(User user) {
-        if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
+        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             log.warn("Электронная почта должна быть не пустой и содержать символ '@'");
             throw new ValidationException("Электронная почта должна быть не пустой и содержать символ '@'");
         }

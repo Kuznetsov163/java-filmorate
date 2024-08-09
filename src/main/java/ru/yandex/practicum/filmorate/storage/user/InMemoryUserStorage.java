@@ -2,128 +2,116 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.User;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
 
-    private final Map<Integer, User> users = new HashMap<>();
-    private int id = 1;
+    private final Map<Long, User> users = new HashMap<>();
+    private long id = 1;
 
     @Override
-    public User create(User user) {
+    public User createUser(User user) {
         user.setId(id++);
         users.put(user.getId(), user);
-        log.info("Пользователь '{}' успешно создан", user.getLogin());
         return user;
 
     }
 
     @Override
-    public User update(User user) {
-        if (!users.containsKey(user.getId())) {
-            log.warn("Пользователь с id {} не найден", user.getId());
-            throw new NotFoundException("Пользователь с таким id не найден");
+    public User updateUser(User user) {
+        if (user.getId() == 0) {
+            throw new NotFoundException("Id фильма должен быть указан");
         }
         users.put(user.getId(), user);
-        log.info("Пользователь '{}' успешно обновлен", user.getLogin());
         return user;
     }
 
+    @Override
+    public Collection<User> getAllUser() {
+        if (users.isEmpty()) {
+            log.info("Список пользователей пуст");
+            throw new NotFoundException("Список пользователей пуст");
+        }
+        return users.values();
+    }
 
     @Override
-    public User get(int id) {
-        if (!users.containsKey(id)) {
-            log.warn("Пользователь с id {} не найден", id);
+    public Optional<User> getUserId(long id) {
+        return Optional.ofNullable(users.get(id));
+    }
+
+    @Override
+    public void deleteUser(long id) {
+        if (getUserId(id).isEmpty() || getUserId(id) == null) {
             throw new NotFoundException("Пользователь с таким id не найден");
         }
-        return users.get(id);
+        users.remove(id);
     }
 
-
     @Override
-    public Set<User> getAll() {
-        log.info("Получение списка всех пользователей");
-        return new HashSet<>(users.values());
-    }
-
-
-    @Override
-    public void addFriend(int userId, int friendId) {
+    public void addFriend(long userId, long friendId) {
         User user = users.get(userId);
-        if (user == null) {
+        Set<Long> friendSet;
+        if (user.getFriends() == null) {
+            friendSet = new HashSet<>();
+        } else {
+            friendSet = new HashSet<>(user.getFriends());
+        }
+        friendSet.add(friendId);
+        user.setFriends(friendSet);
+    }
+
+
+    @Override
+    public void removeFriend(long userId, long friendId) {
+        User user = users.get(userId);
+        User friend = users.get(friendId);
+        if (user.getFriends() == null) {
+            return;
+        }
+        if (user == null || friend == null) {
             log.warn("Пользователь с id {} не найден", userId);
             throw new NotFoundException("Пользователь с таким id не найден");
         }
-        User friend = users.get(friendId);
-        if (friend == null) {
-            log.warn("Пользователь с id {} не найден", friendId);
-            throw new NotFoundException("Пользователь с таким id не найден");
+        Set<Long> friendSet1;
+        Set<Long> friendSet2;
+        if (user.getFriends() == null || friend.getFriends() == null) {
+            throw new NotFoundException("Список друзей пользователя не найден");
+        } else {
+            friendSet1 = user.getFriends();
+            friendSet2 = friend.getFriends();
         }
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
-        log.info("Пользователь {} добавил в друзья пользователя {}", userId, friendId);
-    }
-
-
-    @Override
-    public void removeFriend(int userId, int friendId) {
-        User user = users.get(userId);
-        if (user == null) {
-            log.warn("Пользователь с id {} не найден", userId);
-            throw new NotFoundException("Пользователь с таким id, не найден");
-        }
-        User friend = users.get(friendId);
-        if (friend == null) {
-            log.warn("Пользователь с id {} не найден", friendId);
-            throw new NotFoundException("Пользователь с таким id, не найден");
-        }
-
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
+        friendSet1.remove(friendId);
+        user.setFriends(friendSet1);
+        friendSet2.remove(userId);
+        friend.setFriends(friendSet2);
         log.info("Пользователь {} удалил из друзей пользователя {}", userId, friendId);
     }
 
-
     @Override
-    public Set<User> getFriends(int userId) {
-        User user = users.get(userId);
-        if (user == null) {
-            log.warn("Пользователь с id {} не найден", userId);
-            throw new NotFoundException("Пользователь с таким id не найден");
-        }
-        log.info("Список друзей пользователя ");
-        return user.getFriends().stream()
+    public Set<User> getCommonFriends(long userId, long otherId) {
+        Set<Long> friends = users.get(otherId).getFriends();
+
+
+        log.info("Список общих друзей пользователей");
+        return users.get(id).getFriends().stream()
+                .filter(friends::contains)
                 .map(users::get)
                 .collect(Collectors.toSet());
     }
 
     @Override
-    public Set<User> getCommonFriends(int userId, int otherId) {
-        User user = users.get(userId);
-        User other = users.get(otherId);
-        if (user == null) {
-            log.warn("Пользователь с id {} не найден", userId);
-            throw new NotFoundException("Пользователь с таким id не найден");
-        }
-        if (other == null) {
-            log.warn("Пользователь с id {} не найден", otherId);
-            throw new NotFoundException("Пользователь с таким id не найден");
-        }
+    public Set<User> getFriends(long userId) {
 
-        Set<Integer> commonFriends = new HashSet<>(user.getFriends());
-        commonFriends.retainAll(other.getFriends());
-        log.info("Список общих друзей пользователей {} и {}", user.getName(), other.getName());
-        return commonFriends.stream()
-                .map(users::get)
-                .collect(Collectors.toSet());
+        if (users.get(id).getFriends() == null) {
+             return new HashSet<>();
+         }
+        return users.get(id).getFriends().stream()
+                .map(users::get).collect(Collectors.toSet());
     }
 }

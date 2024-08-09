@@ -1,57 +1,100 @@
 package ru.yandex.practicum.filmorate.service;
 
-
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import java.time.LocalDate;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import java.util.Set;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-@Service
-@Slf4j
+
+import java.util.*;
+
+  @RequiredArgsConstructor
+  @Service
+  @Slf4j
+
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
-    @Autowired
-    public FilmService(FilmStorage filmStorage) {
-        this.filmStorage = filmStorage;
-    }
 
-    public Film create(Film film) {
+
+
+    public  Film createFilm(Film film) {
+        log.info("Получен запрос на создание фильма: {}", film);
         validateFilm(film);
-        return filmStorage.create(film);
+        film = filmStorage.createFilm(film);
+        log.info("Фильм успешно добавлен {}", film);
+        return film;
     }
 
-    public Film update(Film film) {
+    public Film updateFilm(Film film) {
+        if (film.getId() == 0) {
+            throw new ValidationException("Id фильма должен быть указан");
+        }
         validateFilm(film);
-        return filmStorage.update(film);
+        getFilmId(film.getId());
+        log.info("Получен запрос на обновление фильма: {}", film);
+        Film filUp = filmStorage.getFilmId(film.getId()).get();
+        filUp = filUp.toBuilder()
+                .name(film.getName())
+                .description(film.getDescription())
+                .releaseDate(film.getReleaseDate())
+                .duration(film.getDuration())
+                .build();
+        filmStorage.updateFilm(filUp);
+        log.info("Обновлен фильм {}", film);
+        return film;
     }
 
-    public Film get(int id) {
-        return filmStorage.get(id);
+
+    public Collection<Film> getAllFilm() {
+        log.info("Получен запрос на получение всех фильмов");
+        return filmStorage.getAllFilm();
     }
 
-    public Set<Film> getAll() {
-        return filmStorage.getAll();
-    }
 
-    public void addLike(int filmId, int userId) {
+    public void addLike(long filmId, long userId) {
+        getFilmId(filmId);
+        getUserId(userId);
+        log.info("Получен запрос на добавление лайка: {}, {}", filmId, userId);
         filmStorage.addLike(filmId, userId);
+        log.info("Лайк успешно добавлен: {}, {}", userId, filmId);
     }
 
-    public void removeLike(int filmId, int userId) {
+    public void removeLike(long filmId, long userId) {
+        getFilmId(filmId);
+        getUserId(userId);
+        log.info("Получен запрос на удаление лайка: filmId={}, userId={}", filmId, userId);
         filmStorage.removeLike(filmId, userId);
+        log.info("Лайк успешно удален: filmId={}, userId={}", filmId, userId);
     }
 
-    public Set<Film> getTopFilms(int count) {
-        return filmStorage.getTopFilms(count);
-    }
+      public Collection<Film> getTopFilms(long count) {
+          log.info("Получен запрос на получение списка популярных фильмов");
+          return filmStorage.getTopFilms(count);
+      }
+
+      private void getFilmId(long filmId) {
+          if (filmStorage.getFilmId(filmId).isEmpty()) {
+              log.warn("Фильм с id {} не найден", filmId);
+              throw new NotFoundException("Фильм с id  " + filmId + " не найден");
+          }
+      }
+
+      private void getUserId(long id) {
+          if (userStorage.getUserId(id).isEmpty()) {
+              log.warn("Пользователь с id {} не найден", id);
+              throw new NotFoundException("Фильм с id " + id + " не найден");
+          }
+      }
 
     private void validateFilm(Film film) {
-        if (film.getName().isEmpty()) {
+        if (film.getName().isBlank()) {
             log.warn("Название фильма не может быть пустым");
             throw new ValidationException("Название фильма не может быть пустым");
         }
