@@ -16,10 +16,8 @@ public class FilmControllerTest {
 
     @Test // пустое название
     void test_Create() {
-
-
-        Film film = Film.builder().
-                 name("")
+        Film film = Film.builder()
+                .name("")
                 .description("Description")
                 .duration(1000)
                 .releaseDate(LocalDate.parse("1896-10-10")).build();
@@ -30,10 +28,9 @@ public class FilmControllerTest {
 
     @Test // раньше 28 декабря 1895
     void test_Create_2() {
-
-        Film film = Film.builder().
-        name("Name")
-        .description("Description")
+        Film film = Film.builder()
+                .name("Name")
+                .description("Description")
                 .duration(1000)
                 .releaseDate(LocalDate.parse("1890-10-10")).build();
 
@@ -42,8 +39,8 @@ public class FilmControllerTest {
 
     @Test // Продолжительность фильма 0
     void test_Create_3() {
-        Film film = Film.builder().
-        name("Name")
+        Film film = Film.builder()
+                .name("Name")
                 .description("Description")
                 .duration(0)
                 .releaseDate(LocalDate.parse("1896-10-10")).build();
@@ -54,8 +51,8 @@ public class FilmControllerTest {
 
     @Test // Продолжительность фильма отрицательная
     void test_Create_4() {
-        Film film =  Film.builder().
-                 name("Name")
+        Film film =  Film.builder()
+                .name("Name")
                 .description("Description")
                 .duration(-1000)
                 .releaseDate(LocalDate.parse("1896-10-10")).build();
@@ -65,10 +62,10 @@ public class FilmControllerTest {
 
     @Test // Больше 200 символов
     void test_Create_5() {
-        Film film = Film.builder().
-                 name("Name")
+        Film film = Film.builder()
+                .name("Name")
                 .description("D".repeat(201))
-                        .duration(1000)
+                .duration(1000)
                 .releaseDate(LocalDate.parse("1896-10-10")).build();
 
 
