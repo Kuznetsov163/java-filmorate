@@ -14,8 +14,8 @@ class InMemoryFilmStorageTest {
 
     @Test
     void testCreate() {
-        Film film = Film.builder().
-        name("Name")
+        Film film = Film.builder()
+                .name("Name")
                 .description("Description")
                 .releaseDate(LocalDate.parse("1896-10-10"))
                 .duration(1000).build();
@@ -30,8 +30,8 @@ class InMemoryFilmStorageTest {
 
     @Test
     void testUpdate() {
-        Film film = Film.builder().
-        name("Name")
+        Film film = Film.builder()
+                .name("Name")
                 .description("Description")
                 .releaseDate(LocalDate.parse("1896-10-10"))
                 .duration(6).build();
@@ -68,13 +68,13 @@ class InMemoryFilmStorageTest {
 
     @Test
     void testGetAll() {
-        Film film = Film.builder().
-        name("Name")
+        Film film = Film.builder()
+                .name("Name")
                 .description("Description")
                 .releaseDate(LocalDate.parse("1896-10-10"))
                 .duration(6).build();
-        Film film2 = Film.builder().
-        name("Name2")
+        Film film2 = Film.builder()
+                .name("Name2")
                 .description("Description2")
                 .releaseDate(LocalDate.parse("1896-10-14"))
                 .duration(6).build();
@@ -99,8 +99,8 @@ class InMemoryFilmStorageTest {
     void testRemoveLike() {
         Film film = Film.builder()
                 .name("Name")
-        .description("Description")
-        .releaseDate(LocalDate.parse("1896-10-10"))
+                .description("Description")
+                .releaseDate(LocalDate.parse("1896-10-10"))
                 .duration(6).build();
         Film createdFilm = filmStorage.createFilm(film);
         filmStorage.addLike(createdFilm.getId(), 1);

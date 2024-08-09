@@ -19,8 +19,8 @@ public class UserControllerTest {
         // Пустой login
     void test_Create() {
 
-        User user = User.builder().
-                email("@.ru")
+        User user = User.builder()
+                .email("@.ru")
                 .name("Name")
                 .login("")
                 .birthday(LocalDate.parse("1900-01-01")).build();
@@ -32,8 +32,8 @@ public class UserControllerTest {
         // Пустой email
     void test_Create2() {
 
-        User user = User.builder().
-                email("")
+        User user = User.builder()
+                .email("")
                 .name("Name")
                 .login("g")
                 .birthday(LocalDate.parse("1900-01-01")).build();
@@ -44,8 +44,8 @@ public class UserControllerTest {
     @Test
         //  Email без @
     void test_Create3() {
-        User user = User.builder().
-                email(".ru")
+        User user = User.builder()
+                .email(".ru")
                 .name("Name")
                 .login("g")
                 .birthday(LocalDate.parse("1900-01-01")).build();
@@ -56,8 +56,8 @@ public class UserControllerTest {
     @Test
         // Содержание пробелов в login
     void test_Create4() {
-        User user = User.builder().
-                email("@.ru")
+        User user = User.builder()
+                .email("@.ru")
                 .name("Name")
                 .login("g g")
                 .birthday(LocalDate.parse("1900-01-01")).build();
@@ -68,8 +68,8 @@ public class UserControllerTest {
     @Test
         // Дата рождения в будующем
     void test_Create5() {
-        User user = User.builder().
-                email("@.ru")
+        User user = User.builder()
+                .email("@.ru")
                 .name("Name")
                 .login("g")
                 .birthday(LocalDate.parse("2222-01-01")).build();
@@ -80,8 +80,8 @@ public class UserControllerTest {
     @Test
         // Обновление пользователя
     void test_Update() {
-        User user = User.builder().
-                email("@.ru")
+        User user = User.builder()
+                .email("@.ru")
                 .name("Name")
                 .login("gg")
                 .birthday(LocalDate.parse("1900-01-01")).build();

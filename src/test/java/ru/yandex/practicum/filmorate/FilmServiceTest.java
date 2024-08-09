@@ -24,8 +24,8 @@ public class FilmServiceTest {
  @Test
  void getTopFilms() {
 
-     Film film =  Film.builder().
-     name("Name")
+     Film film =  Film.builder()
+             .name("Name")
              .description("Description")
              .duration(100)
              .releaseDate(LocalDate.parse("1896-10-10")).build();
@@ -43,15 +43,15 @@ public class FilmServiceTest {
     @Test
     void testRemoveFriend() {
 
-        User user1 = User.builder().
-                email("@.ru")
+        User user1 = User.builder()
+                .email("@.ru")
                 .name("Name")
                 .login("gg")
                 .birthday(LocalDate.parse("1900-01-01")).build();
         userService.createUser(user1);
 
-        User user2 = User.builder().
-        email("@.rгu")
+        User user2 = User.builder()
+                .email("@.rгu")
                 .name("Nae")
                 .login("g")
                 .birthday(LocalDate.parse("1901-01-01")).build();
