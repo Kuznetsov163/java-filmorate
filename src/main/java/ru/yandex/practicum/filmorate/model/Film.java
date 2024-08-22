@@ -7,31 +7,36 @@ package ru.yandex.practicum.filmorate.model;
 дата релиза — releaseDate;
 продолжительность фильма — duration.
  */
-import lombok.Data;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
-
+import lombok.Builder;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 
   @Data
-
+  @Slf4j
+  @Builder(toBuilder = true)
   public class Film {
-    private Integer id;
 
-  @NotBlank(message = "Название фильма не может быть пустым")
-  private String name;
+    @NotNull(message = "id фильма не может быть пустым")
+    private long id;
 
-  @Size(max = 200, message = "Максимальная длина описания — 200 символов")
-  private String description;
+    @NotNull(message = "Название фильма не может быть пустым")
+    private String name;
 
-  @NotNull(message = "Дата релиза не может быть пустой")
+    @NotNull(message = "Описание фильма не может быть пустым")
+    private String description;
 
-  private LocalDate releaseDate;
+    @NotNull(message = "Дата выхода не может быть пустой")
+    private LocalDate releaseDate;
 
-  @Positive(message = "Продолжительность фильма должна быть положительным числом")
-  private int duration;
+    @NotNull(message = "Длительность фильма не может быть пустой")
+    private int duration;
+
+    @NotNull(message = "Список лайков фильма не может быть пустым")
+    private Set<Long> likes = new HashSet<>();
 
 }
