@@ -3,14 +3,14 @@ package ru.yandex.practicum.filmorate.controller;
 import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.web.bind.annotation.*;
 import java.util.Collection;
-import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.filmorate.service.UserService;
-
+import org.springframework.beans.factory.annotation.Qualifier;
 
 
 @RestController
 @RequestMapping("/users")
+@Qualifier("UserDbStorage")
 public class UserController {
     private final UserService userService;
 
@@ -43,12 +43,12 @@ public class UserController {
 
 
     @GetMapping("/{id}/friends")
-    public Set<User> getUserFriends(@PathVariable long id) {
+    public Collection<User> getUserFriends(@PathVariable long id) {
         return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Set<User> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
+    public Collection<User> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
         return userService.getCommonFriends(id, otherId);
     }
 

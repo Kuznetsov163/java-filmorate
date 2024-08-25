@@ -1,16 +1,30 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.*;
 import java.util.Collection;
 
-@RequiredArgsConstructor
-@RestController
-@RequestMapping("/films")
-public class FilmController {
+
+
+  @RestController
+  @RequestMapping("/films")
+  @Qualifier("FilmDbStorage")
+  public class FilmController {
+
     private final FilmService filmService;
+    private final MPAService mpaService;
+    private final GenreService genreService;
+
+    public FilmController(@Autowired FilmService filmService, MPAService mpaService, GenreService genreService) {
+
+        this.filmService = filmService;
+        this.mpaService = mpaService;
+        this.genreService = genreService;
+     }
 
     @PostMapping
     public Film createFilm(@RequestBody Film film) {

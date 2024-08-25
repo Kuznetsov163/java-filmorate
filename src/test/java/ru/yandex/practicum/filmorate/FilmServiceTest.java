@@ -27,7 +27,7 @@ public class FilmServiceTest {
      Film film =  Film.builder()
              .name("Name")
              .description("Description")
-             .duration(100)
+             .duration(100l)
              .releaseDate(LocalDate.parse("1896-10-10")).build();
      film.setLikes(new HashSet<>());
      film.getLikes().add(1L);

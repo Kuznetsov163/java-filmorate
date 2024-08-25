@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Set;
 
 
 @Service
@@ -88,13 +87,13 @@ public class UserService {
 
     }
 
-    public Set<User> getFriends(long id) {
+    public Collection<User> getFriends(long id) {
         log.info("Получен запрос на получение друзей пользователя с id {}", id);
         get(id);
         return userStorage.getFriends(id);
     }
 
-    public Set<User> getCommonFriends(long id, long otherId) {
+    public Collection<User> getCommonFriends(long id, long otherId) {
         log.info("Получен запрос на получение общих друзей пользователей {} и {}", id, otherId);
         get(id);
         get(otherId);

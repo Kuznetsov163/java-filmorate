@@ -45,13 +45,7 @@ public class InMemoryUserStorage implements UserStorage {
         return Optional.ofNullable(users.get(id));
     }
 
-    @Override
-    public void deleteUser(long id) {
-        if (getUserId(id).isEmpty() || getUserId(id) == null) {
-            throw new NotFoundException("Пользователь с таким id не найден");
-        }
-        users.remove(id);
-    }
+
 
     @Override
     public void addFriend(long userId, long friendId) {
@@ -94,7 +88,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Set<User> getCommonFriends(long id, long otherId) {
+    public Collection<User> getCommonFriends(long id, long otherId) {
         Set<Long> friends = users.get(otherId).getFriends();
         return users.get(id).getFriends().stream()
                 .filter(friends::contains)
@@ -103,7 +97,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Set<User> getFriends(long id) {
+    public Collection<User> getFriends(long id) {
 
         if (users.get(id).getFriends() == null) {
              return new HashSet<>();
