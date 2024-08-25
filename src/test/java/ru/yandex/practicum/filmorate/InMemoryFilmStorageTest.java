@@ -18,7 +18,7 @@ class InMemoryFilmStorageTest {
                 .name("Name")
                 .description("Description")
                 .releaseDate(LocalDate.parse("1896-10-10"))
-                .duration(1000l).build();
+                .duration(1000L).build();
         Film createdFilm = filmStorage.createFilm(film);
 
         assertNotNull(createdFilm.getId());
@@ -34,7 +34,7 @@ class InMemoryFilmStorageTest {
                 .name("Name")
                 .description("Description")
                 .releaseDate(LocalDate.parse("1896-10-10"))
-                .duration(6l).build();
+                .duration(6L).build();
         Film createdFilm = filmStorage.createFilm(film);
         film.setName("New Name");
 
@@ -50,7 +50,7 @@ class InMemoryFilmStorageTest {
                 .name("Name")
                 .description("Description")
                 .releaseDate(LocalDate.parse("1896-10-10"))
-                .duration(6l)
+                .duration(6L)
                 .build();
         Film createdFilm = filmStorage.createFilm(film);
 
@@ -72,17 +72,17 @@ class InMemoryFilmStorageTest {
                 .name("Name")
                 .description("Description")
                 .releaseDate(LocalDate.parse("1896-10-10"))
-                .duration(6l).build();
+                .duration(6L).build();
         Film film2 = Film.builder()
                 .name("Name2")
                 .description("Description2")
                 .releaseDate(LocalDate.parse("1896-10-14"))
-                .duration(6l).build();
+                .duration(6L).build();
         Film film3 = Film.builder()
                 .name("Na")
                 .description("Descri")
                 .releaseDate(LocalDate.parse("1899-10-14"))
-                .duration(888l).build();
+                .duration(888L).build();
         filmStorage.createFilm(film);
         filmStorage.createFilm(film2);
         filmStorage.createFilm(film3);
@@ -101,7 +101,7 @@ class InMemoryFilmStorageTest {
                 .name("Name")
                 .description("Description")
                 .releaseDate(LocalDate.parse("1896-10-10"))
-                .duration(6l).build();
+                .duration(6L).build();
         Film createdFilm = filmStorage.createFilm(film);
         filmStorage.addLike(createdFilm.getId(), 1);
 
