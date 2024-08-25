@@ -10,10 +10,10 @@ import java.util.Collection;
 
 
 
-  @RestController
-  @RequestMapping("/films")
-  @Qualifier("FilmDbStorage")
-  public class FilmController {
+@RestController
+@RequestMapping("/films")
+@Qualifier("FilmDbStorage")
+public class FilmController {
 
     private final FilmService filmService;
     private final MPAService mpaService;
@@ -24,7 +24,7 @@ import java.util.Collection;
         this.filmService = filmService;
         this.mpaService = mpaService;
         this.genreService = genreService;
-     }
+    }
 
     @PostMapping
     public Film createFilm(@RequestBody Film film) {

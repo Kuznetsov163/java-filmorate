@@ -1,10 +1,11 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
-
+import org.springframework.stereotype.Component;
 import java.util.Collection;
 import java.util.Optional;
 
+@Component
 public interface FilmStorage {
 
     Film createFilm(Film film);

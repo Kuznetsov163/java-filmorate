@@ -35,7 +35,7 @@ import java.util.TreeSet;
     private LocalDate releaseDate;
 
     @NotNull(message = "Длительность фильма не может быть пустой")
-    private Long duration;
+    private int duration;
 
     @NotNull(message = "Список лайков фильма не может быть пустым")
     private Set<Long> likes = new HashSet<>();

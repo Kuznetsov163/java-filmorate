@@ -19,7 +19,7 @@ public class FilmControllerTest {
         Film film = Film.builder()
                 .name("")
                 .description("Description")
-                .duration(1000L)
+                .duration(1000)
                 .releaseDate(LocalDate.parse("1896-10-10")).build();
 
         assertThrows(ValidationException.class, () -> filmController.createFilm(film));
@@ -31,7 +31,7 @@ public class FilmControllerTest {
         Film film = Film.builder()
                 .name("Name")
                 .description("Description")
-                .duration(1000L)
+                .duration(1000)
                 .releaseDate(LocalDate.parse("1890-10-10")).build();
 
         assertThrows(ValidationException.class, () -> filmController.createFilm(film));
@@ -42,7 +42,7 @@ public class FilmControllerTest {
         Film film = Film.builder()
                 .name("Name")
                 .description("Description")
-                .duration(0L)
+                .duration(0)
                 .releaseDate(LocalDate.parse("1896-10-10")).build();
 
 
@@ -54,7 +54,7 @@ public class FilmControllerTest {
         Film film =  Film.builder()
                 .name("Name")
                 .description("Description")
-                .duration(-1000L)
+                .duration(-1000)
                 .releaseDate(LocalDate.parse("1896-10-10")).build();
 
         assertThrows(ValidationException.class, () -> filmController.createFilm(film));
@@ -65,7 +65,7 @@ public class FilmControllerTest {
         Film film = Film.builder()
                 .name("Name")
                 .description("D".repeat(201))
-                .duration(1000L)
+                .duration(1000)
                 .releaseDate(LocalDate.parse("1896-10-10")).build();
 
 
