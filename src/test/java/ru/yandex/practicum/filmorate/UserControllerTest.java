@@ -19,7 +19,7 @@ public class UserControllerTest {
         // Пустой login
     void test_Create() {
 
-        User user =new User();
+        User user = new User();
         user.setEmail("@.ru");
         user.setName("Name");
         user.setLogin("");
@@ -32,7 +32,7 @@ public class UserControllerTest {
         // Пустой email
     void test_Create2() {
 
-        User user =new User();
+        User user = new User();
         user.setEmail("");
         user.setName("Name");
         user.setLogin("g");
