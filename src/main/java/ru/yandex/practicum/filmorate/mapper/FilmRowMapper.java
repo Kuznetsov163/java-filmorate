@@ -24,10 +24,10 @@ public class FilmRowMapper implements RowMapper<Film> {
 
     @Override
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
-        Film film =  Film.builder()
-                .id(rs.getLong("id"))
-                .name(rs.getString("name"))
-                .mpa(jdbc.queryForObject(FIND_MPA_RATING, MPARATING_ROW_MAPPER,rs.getLong("MPArating_id"))).build();
+        Film film = new Film();
+        film.setId(rs.getLong("id"));
+        film.setName(rs.getString("name"));
+        film.setMpa(jdbc.queryForObject(FIND_MPA_RATING, MPARATING_ROW_MAPPER,rs.getLong("MPArating_id")));
         List<Long> genreids = jdbc.query(FIND_GENRES, (rs1, rowNum1) -> {
             Long longg = rs1.getLong("GENRE_ID");
             return longg;

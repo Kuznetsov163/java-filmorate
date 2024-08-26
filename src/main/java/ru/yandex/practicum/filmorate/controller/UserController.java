@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import ru.yandex.practicum.filmorate.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,24 @@ public class UserController {
     public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
         userService.removeFriend(id, friendId);
 
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleValidation(final ValidationException e) {
+        return Map.of("error", "Произошла ошибка валидации одного из параметров: " + e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNotFound(final NotFoundException e) {
+        return Map.of("error", "Не найден переданный параметр.");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleRuntime(final Throwable e) {
+        return Map.of("error", "Произошла непредвиденная ошибка.");
     }
 
     @PostMapping

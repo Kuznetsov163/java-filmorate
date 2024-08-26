@@ -8,7 +8,8 @@ import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.service.MPAService;
 import java.util.Collection;
 import java.util.Optional;
-
+import java.util.Map;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/mpa")
@@ -20,6 +21,11 @@ public class MPAController {
         this.mpaService = mpaService;
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNotFound(final NotFoundException e) {
+        return Map.of("error", "Не найден переданный параметр.");
+    }
 
     @GetMapping
     public Collection<MPA> findAll() {

@@ -4,11 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.*;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
+
+import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
@@ -28,18 +32,6 @@ public class FilmController {
         this.genreService = genreService;
     }
 
-    @PostMapping
-    public Film createFilm(@RequestBody Film film) {
-        if (mpaService.findOne(film.getMpa().getId()).isEmpty()) {
-            throw new ValidationException("Не найден MPA с рейтингом" + film.getMpa().getId());
-        }
-        return filmService.createFilm(film);
-    }
-
-    @PutMapping
-    public Film updateFilm(@RequestBody Film film) {
-        return filmService.updateFilm(film);
-    }
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable Long id, @PathVariable Long userId) {
@@ -51,9 +43,32 @@ public class FilmController {
         filmService.removeLike(id, userId);
     }
 
-    @GetMapping
-    public Collection<Film> getAllFilm() {
-        return filmService.getAllFilm();
+
+    @GetMapping("/popular")
+    public List<Film> getTopFilms(@PathVariable("count") @RequestParam(defaultValue = "10") long count) {
+        return filmService.getTopFilms(count);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleValidation(final ValidationException e) {
+        return Map.of("error", "Произошла ошибка валидации одного из параметров: " + e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNotFound(final NotFoundException e) {
+        return Map.of("error", "Не найден переданный параметр.");
+    }
+
+    @PostMapping
+    public Film createFilm(@RequestBody @Valid Film film) {
+        if (mpaService.findOne(film.getMpa().getId()).isEmpty()) {
+            throw new ValidationException("Не найден MPA с рейтингом" + film.getMpa().getId());
+        } else if (!checkGenres(film)) {
+            throw new ValidationException("Не найден один из переданных жанров");
+        }
+        return filmService.createFilm(film);
     }
 
     @GetMapping("/{id}")
@@ -61,8 +76,26 @@ public class FilmController {
         return filmService.findOne(id);
     }
 
-    @GetMapping("/popular")
-    public List<Film> getTopFilms(@RequestParam(defaultValue = "10") long count) {
-        return filmService.getTopFilms(count);
+    @PutMapping
+    public Film updateFilm(@RequestBody @Valid Film film) {
+        return filmService.updateFilm(film);
+    }
+
+    @GetMapping
+    public Collection<Film> getAllFilm() {
+        return filmService.getAllFilm();
+    }
+
+    boolean checkGenres(Film film) {
+        TreeSet<Genre> genres = film.getGenres();
+        if (genres == null) {
+            return true;
+        }
+        for (Genre genre: genres) {
+            if (genreService.findOne(genre.getId()).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 }
