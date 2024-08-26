@@ -8,8 +8,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-
-
 import java.util.*;
 
 
@@ -30,7 +28,9 @@ public class FilmService {
       }
 
     public  Film createFilm(Film film) {
-
+        if (film.getReleaseDate().isBefore(Film.MIN_RELEASE_DATE)) {
+            throw new ValidationException("Дата фильма не может быть ранее 28 декабря 1895 года.");
+        }
         film = filmStorage.createFilm(film);
         return film;
     }
