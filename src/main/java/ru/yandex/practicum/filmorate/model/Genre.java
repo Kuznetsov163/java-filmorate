@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class Genre implements Comparable<Genre> {
-    long id;
+    Long id;
     String name;
 
     @Override

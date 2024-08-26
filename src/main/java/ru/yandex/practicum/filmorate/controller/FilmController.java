@@ -7,8 +7,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.*;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
-
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 @RestController
 @RequestMapping("/films")
@@ -28,6 +30,9 @@ public class FilmController {
 
     @PostMapping
     public Film createFilm(@RequestBody Film film) {
+        if (mpaService.findOne(film.getMpa().getId()).isEmpty()) {
+            throw new ValidationException("Не найден MPA с рейтингом" + film.getMpa().getId());
+        }
         return filmService.createFilm(film);
     }
 
@@ -37,12 +42,12 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable long id, @PathVariable long userId) {
+    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
         filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void removeLike(@PathVariable long id, @PathVariable long userId) {
+    public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
         filmService.removeLike(id, userId);
     }
 
@@ -51,9 +56,13 @@ public class FilmController {
         return filmService.getAllFilm();
     }
 
-    @GetMapping("/popular")
-    public Collection<Film> getTopFilms(@RequestParam(defaultValue = "10") long count) {
-        return filmService.getTopFilms(count);
+    @GetMapping("/{id}")
+    public Optional<Film> findOne(@PathVariable Long id) {
+        return filmService.findOne(id);
     }
 
+    @GetMapping("/popular")
+    public List<Film> getTopFilms(@RequestParam(defaultValue = "10") long count) {
+        return filmService.getTopFilms(count);
+    }
 }

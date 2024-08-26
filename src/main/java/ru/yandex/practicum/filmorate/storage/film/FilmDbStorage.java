@@ -7,11 +7,13 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 import java.time.Instant;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import java.util.*;
+import ru.yandex.practicum.filmorate.mapper.*;
 
 
-@Repository
-public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
+  @Repository
+  public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM films";
 
@@ -119,22 +121,22 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public Optional<Film> getFilmId(long id) {
-        return super.findOne(FIND_ONE_QUERY,id);
+    public Optional<Film> getFilmId(Long filmId) {
+        return super.findOne(FIND_ONE_QUERY,filmId);
     }
 
     @Override
-    public void addLike(long filmId, long userId) {
+    public void addLike(Long filmId, Long userId) {
         super.insert(INSERT_LIKE_QUERY,filmId,userId, Instant.now());
     }
 
     @Override
-    public void removeLike(long filmId, long userId) {
+    public void removeLike(Long filmId, Long userId) {
         super.delete(DELETE_LIKE_QUERY,filmId,userId);
     }
 
     @Override
-    public Collection<Film> getTopFilms(long count) {
+    public List<Film> getTopFilms(long count) {
         Comparator<Film> comparator = Comparator.comparing(film -> film.getLikes().size(), Comparator.reverseOrder());
         return super.findMany(FIND_MOST_POPULAR,count).stream().sorted(comparator).toList();
     }

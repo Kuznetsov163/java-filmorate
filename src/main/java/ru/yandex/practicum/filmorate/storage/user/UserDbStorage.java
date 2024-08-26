@@ -80,30 +80,30 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     }
 
     @Override
-    public Optional<User> getUserId(long userId) {
+    public Optional<User> getUserId(Long userId) {
         return super.findOne(FIND_ONE_QUERY,userId);
     }
 
     @Override
-    public void addFriend(long firstUserId, long secondUserId) {
+    public void addFriend(Long userOneId, Long userTwoId) {
         super.insert(INSERT_FRIEND_QUERY,
-                firstUserId,
-                secondUserId);
+                userOneId,
+                userTwoId);
     }
 
     @Override
-    public Collection<User> getFriends(long id) {
+    public Collection<User> getFriends(Long id) {
         return super.findMany(SELECT_FRIENDS_QUERY, id);
 
     }
 
     @Override
-    public void removeFriend(long userId, long friendId) {
-        super.delete(DELETE_FRIEND_QUERY,userId,userId);
+    public void removeFriend(Long userOneId, Long userTwoId) {
+        super.delete(DELETE_FRIEND_QUERY,userOneId,userTwoId);
     }
 
     @Override
-    public Collection<User> getCommonFriends(long id, long otherId) {
-        return super.findMany(SELECT_COMMON_FRIENDS,id,otherId);
+    public Collection<User> getCommonFriends(Long userOneId, Long userTwoId) {
+        return super.findMany(SELECT_COMMON_FRIENDS,userOneId,userTwoId);
     }
 }

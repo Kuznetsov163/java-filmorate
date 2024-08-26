@@ -1,11 +1,17 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import java.util.*;
-import java.util.stream.Collectors;
 
+import java.time.LocalDate;
+import java.util.*;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import jakarta.validation.Valid;
 
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
@@ -13,24 +19,34 @@ public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
     private long id = 1;
 
-    @Override
-    public User createUser(User user) {
+    @PostMapping
+    public User createUser(@RequestBody @Valid User user) {
+        validateUser(user);
         user.setId(id++);
         users.put(user.getId(), user);
+        log.info("Добавлен пользователь: " + user);
         return user;
 
     }
 
-    @Override
+    @PutMapping
     public User updateUser(User user) {
         if (user.getId() == 0) {
             throw new NotFoundException("Id фильма должен быть указан");
         }
+        if (user.getLogin().contains(" ")) {
+            throw new ValidationException("Логин не может содержать пробелы");
+        } else if (user.getName() == null) {
+            user.setName(user.getLogin());
+        }  else if (!users.containsKey(user.getId())) {
+            throw new NotFoundException("Не найден изменяемый пользователь");
+        }
+        log.info("Изменён пользователь: " + user);
         users.put(user.getId(), user);
         return user;
     }
 
-    @Override
+    @GetMapping
     public Collection<User> getAllUser() {
         if (users.isEmpty()) {
             log.info("Список пользователей пуст");
@@ -40,68 +56,46 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> getUserId(long id) {
-        return Optional.ofNullable(users.get(id));
+    public Optional<User> getUserId(Long userId) {
+        return Optional.ofNullable(users.get(userId));
     }
 
 
 
     @Override
-    public void addFriend(long userId, long friendId) {
-        User user = users.get(userId);
-        Set<Long> friendSet;
-        if (user.getFriends() == null) {
-            friendSet = new HashSet<>();
-        } else {
-            friendSet = new HashSet<>(user.getFriends());
-        }
-        friendSet.add(friendId);
-        user.setFriends(friendSet);
+    public void addFriend(Long oneUser, Long twoId) {
     }
 
 
     @Override
-    public void removeFriend(long userId, long friendId) {
-        User user = users.get(userId);
-        User friend = users.get(friendId);
-        if (user.getFriends() == null) {
-            return;
-        }
-        if (user == null || friend == null) {
-            log.warn("Пользователь с id {} не найден", userId);
-            throw new NotFoundException("Пользователь с таким id не найден");
-        }
-        Set<Long> friendSet1;
-        Set<Long> friendSet2;
-        if (user.getFriends() == null || friend.getFriends() == null) {
-            throw new NotFoundException("Список друзей пользователя не найден");
-        } else {
-            friendSet1 = user.getFriends();
-            friendSet2 = friend.getFriends();
-        }
-        friendSet1.remove(friendId);
-        user.setFriends(friendSet1);
-        friendSet2.remove(userId);
-        friend.setFriends(friendSet2);
-        log.info("Пользователь {} удалил из друзей пользователя {}", userId, friendId);
+    public void removeFriend(Long userOneId, Long userTwoId) {
     }
 
     @Override
-    public Collection<User> getCommonFriends(long id, long otherId) {
-        Set<Long> friends = users.get(otherId).getFriends();
-        return users.get(id).getFriends().stream()
-                .filter(friends::contains)
-                .map(users::get)
-                .collect(Collectors.toSet());
+    public Collection<User> getCommonFriends(Long userOneId, Long userTwoId) {
+        return null;
     }
 
     @Override
-    public Collection<User> getFriends(long id) {
+    public Collection<User> getFriends(Long id) {
+        return null;
+    }
 
-        if (users.get(id).getFriends() == null) {
-             return new HashSet<>();
-         }
-        return users.get(id).getFriends().stream()
-                .map(users::get).collect(Collectors.toSet());
+    private void validateUser(User user) {
+        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+            log.warn("Электронная почта должна быть не пустой и содержать символ '@'");
+            throw new ValidationException("Электронная почта должна быть не пустой и содержать символ '@'");
+        }
+        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
+            log.warn("Логин не может быть пустым и содержать пробелы");
+            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
+        }
+        if ((user.getName() == null) || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            log.warn("Дата рождения не может быть в будущем");
+            throw new ValidationException("Дата рождения не может быть в будущем");
+        }
     }
 }

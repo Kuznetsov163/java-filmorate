@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 /*
-У model.Film должны быть следующие свойства:
+У model. Film должны быть следующие свойства:
 целочисленный идентификатор — id;
 название — name;
 описание — description;
@@ -22,22 +22,18 @@ import java.util.TreeSet;
    @Builder(toBuilder = true)
    public class Film {
 
-    @NotNull(message = "id фильма не может быть пустым")
-    private long id;
+
+    private Long id;
 
     @NotNull(message = "Название фильма не может быть пустым")
     private String name;
 
-    @NotNull(message = "Описание фильма не может быть пустым")
     private String description;
 
-    @NotNull(message = "Дата выхода не может быть пустой")
     private LocalDate releaseDate;
 
-    @NotNull(message = "Длительность фильма не может быть пустой")
-    private int duration;
+    private Long duration;
 
-    @NotNull(message = "Список лайков фильма не может быть пустым")
     private Set<Long> likes = new HashSet<>();
 
     private TreeSet<Genre> genres = new TreeSet<>();

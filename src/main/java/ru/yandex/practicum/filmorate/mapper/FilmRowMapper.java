@@ -4,9 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
-
-
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -47,7 +44,7 @@ public class FilmRowMapper implements RowMapper<Film> {
         }
         film.setDescription(rs.getString("description"));
         film.setReleaseDate(rs.getDate("releaseDate").toLocalDate());
-        film.setDuration(rs.getInt("duration"));
+        film.setDuration(rs.getLong("duration"));
         return film;
     }
 }
