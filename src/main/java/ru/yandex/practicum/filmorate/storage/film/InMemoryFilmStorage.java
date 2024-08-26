@@ -31,7 +31,6 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
     @PutMapping
     public Film updateFilm(@RequestBody @Valid Film film) {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.warn("Дата релиза не может быть раньше 28 декабря 1895 года");
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         } else if (film.getId() == null) {
             throw new ValidationException("ИД изменямого фильма не может быть пустым");
@@ -71,19 +70,15 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
     private void validateFilm(Film film) {
         if (film.getName().isBlank()) {
-            log.warn("Название фильма не может быть пустым");
             throw new ValidationException("Название фильма не может быть пустым");
         }
         if (film.getDescription().length() > 200) {
-            log.warn("Описание фильма не может превышать 200 символов");
             throw new ValidationException("Описание фильма не может превышать 200 символов");
         }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.warn("Дата релиза не может быть раньше 28 декабря 1895 года");
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
         if (film.getDuration() <= 0) {
-            log.warn("Продолжительность фильма должна быть положительным числом");
             throw new ValidationException("Продолжительность фильма должна быть положительным числом");
         }
     }
