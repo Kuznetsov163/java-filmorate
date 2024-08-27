@@ -9,15 +9,15 @@ import java.util.Optional;
 @Component
 public interface FilmStorage {
 
-    public Film createFilm(Film film);
+     Film createFilm(Film film);   // исправленно
 
-    public Film updateFilm(Film film);
+     Film updateFilm(Film film);
 
-    public Optional<Film> getFilmId(Long filmId);
+     Optional<Film> getFilmId(Long filmId);
 
     Collection<Film> getAllFilm();
 
-    public void addLike(Long filmId, Long userId);
+    void addLike(Long filmId, Long userId);
 
     void removeLike(Long filmId, Long userId);
 

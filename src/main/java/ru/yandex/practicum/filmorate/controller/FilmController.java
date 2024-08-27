@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import jakarta.validation.Valid;
@@ -86,13 +87,18 @@ public class FilmController {
         return filmService.getAllFilm();
     }
 
-    boolean checkGenres(Film film) {
+    private boolean checkGenres(Film film) {   // исправлено
         TreeSet<Genre> genres = film.getGenres();
         if (genres == null) {
             return true;
         }
-        for (Genre genre: genres) {
-            if (genreService.findOne(genre.getId()).isEmpty()) {
+        Collection<Genre> existingGenres = genreService.findAll();
+        Set<Long> existingGenreIds = existingGenres.stream()
+                .map(Genre::getId)
+                .collect(Collectors.toSet());
+
+        for (Genre genre : genres) {
+            if (!existingGenreIds.contains(genre.getId())) {
                 return false;
             }
         }

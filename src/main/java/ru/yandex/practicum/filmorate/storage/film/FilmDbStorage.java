@@ -7,9 +7,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 import java.time.Instant;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import java.util.*;
-import ru.yandex.practicum.filmorate.mapper.*;
+
 
 
   @Repository
@@ -89,11 +88,12 @@ import ru.yandex.practicum.filmorate.mapper.*;
 
         long id = jdbc.queryForObject(SELECT_FOR_ID_QUERY, Long.class);
         film.setId(id);
-        TreeSet<Genre> genres = film.getGenres();
-        super.delete(DELETE_FILM_GENRES, film.getId());
-        for (Genre genre: genres) {
-            super.insert(INSERT_FILM_GENRES,film.getId(),genre.getId());
+        List<Object[]> batchArgs = new ArrayList<>();  // исправлено
+        for (Genre genre : film.getGenres()) {
+            batchArgs.add(new Object[] {film.getId(), genre.getId()});
         }
+        jdbc.batchUpdate(INSERT_FILM_GENRES, batchArgs);
+
         return film;
     }
 
@@ -112,11 +112,13 @@ import ru.yandex.practicum.filmorate.mapper.*;
                 film.getDuration(),
                 film.getDescription(),
                 film.getId());
-        TreeSet<Genre> genres = film.getGenres();
-        super.delete(DELETE_FILM_GENRES, film.getId());
-        for (Genre genre: genres) {
-            super.insert(INSERT_FILM_GENRES,film.getId(),genre.getId());
+        jdbc.update(DELETE_FILM_GENRES, film.getId());    // исправлено
+        List<Object[]> batchArgs = new ArrayList<>();
+        for (Genre genre : film.getGenres()) {
+            batchArgs.add(new Object[] {film.getId(), genre.getId()});
         }
+        jdbc.batchUpdate(INSERT_FILM_GENRES, batchArgs);
+
         return film;
     }
 
