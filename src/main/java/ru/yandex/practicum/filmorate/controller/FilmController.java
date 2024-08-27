@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 @RestController
+@Slf4j
 @RequestMapping("/films")
 @Qualifier("FilmDbStorage")
 public class FilmController {
@@ -53,12 +55,14 @@ public class FilmController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleValidation(final ValidationException e) {
+        log.warn("Ошибка валидации: {}", e.getMessage(), e);
         return Map.of("error", "Произошла ошибка валидации одного из параметров: " + e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFound(final NotFoundException e) {
+        log.warn("Ресурс не найден: {}", e.getMessage(), e);
         return Map.of("error", "Не найден переданный параметр.");
     }
 
