@@ -1,39 +1,52 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 
-@Component
-@Slf4j
-public class InMemoryFilmStorage implements FilmStorage {
+
+   @Slf4j
+   public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Long, Film> films = new HashMap<>();
 
     private long id = 1;
 
 
-    @Override
-    public Film createFilm(Film film) {
+    @PostMapping
+    public Film createFilm(@RequestBody @Valid Film film) {
+        validateFilm(film);
         film.setId(id++);
         films.put(film.getId(), film);
         return film;
     }
 
-    @Override
-    public Film updateFilm(Film film) {
-        if (film.getId() == 0 || !films.containsKey(film.getId())) {
-            throw new NotFoundException("Id пользователя должен быть указан");
+    @PutMapping
+    public Film updateFilm(@RequestBody @Valid Film film) {
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
+        } else if (film.getId() == null) {
+            throw new ValidationException("ИД изменямого фильма не может быть пустым");
+        } else if (!films.containsKey(film.getId())) {
+            throw new NotFoundException("Не найден изменяемый фильм");
         }
         films.put(film.getId(), film);
         return film;
     }
 
     @Override
+    public Optional<Film> getFilmId(Long filmId) {
+        return Optional.ofNullable(films.get(filmId));
+    }
+
+    @GetMapping
     public Collection<Film> getAllFilm() {
         if (films.isEmpty()) {
             log.info("Список фильмов пуст");
@@ -42,57 +55,44 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.values();
     }
 
-
     @Override
-    public Optional<Film> getFilmId(long id) {
-        return Optional.ofNullable(films.get(id));
+    public void addLike(Long filmId, Long userId) {
     }
 
     @Override
-    public void addLike(long filmId, long userId) {
-        Film film = films.get(filmId);
-        Set<Long> likeSet = new HashSet<>();
-        if (film.getLikes() != null) {
-            likeSet = film.getLikes();
+    public void removeLike(Long filmId, Long userId) {
+    }
+
+    @Override
+    public List<Film> getTopFilms(long count) {
+        return null;
+    }
+
+    private void validateFilm(Film film) {
+        if (film.getName().isBlank()) {
+            throw new ValidationException("Название фильма не может быть пустым");
         }
-        likeSet.add(userId);
-        film.setLikes(likeSet);
-
-    }
-
-
-
-    @Override
-    public void removeLike(long filmId, long userId) {
-        Film film = films.get(filmId);
-        Set<Long> likeSet;
-        if (film.getLikes() == null) {
-            return;
-        } else {
-            likeSet = film.getLikes();
+        if (film.getDescription().length() > 200) {
+            throw new ValidationException("Описание фильма не может превышать 200 символов");
         }
-        likeSet.remove(userId);
-        film.setLikes(likeSet);
-
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
+        }
+        if (film.getDuration() <= 0) {
+            throw new ValidationException("Продолжительность фильма должна быть положительным числом");
+        }
     }
 
+       @ExceptionHandler
+       @ResponseStatus(HttpStatus.BAD_REQUEST)
+       public Map<String, String> handleValidation(final ValidationException e) {
+           return Map.of("error", "Произошла ошибка валидации одного из параметров: " + e.getMessage());
+       }
 
-    @Override
-    public Collection<Film> getTopFilms(long count) {
-        return films.values().stream()
-                .sorted(new Comparator<Film>() {
-                    @Override
-                    public int compare(Film o1, Film o2) {
-                        if (o1.getLikes() == null) {
-                            return o2.getLikes() == null ? 0 : 1;
-                        } else if (o2.getLikes() == null) {
-                            return -1;
-                        }
-                        return o2.getLikes().size() - o1.getLikes().size();
-                    }
-                })
-                .limit(count)
-                .collect(Collectors.toList());
-    }
+       @ExceptionHandler
+       @ResponseStatus(HttpStatus.NOT_FOUND)
+       public Map<String, String> handleNotFound(final NotFoundException e) {
+           return Map.of("error", "Не найден переданный параметр.");
+       }
 }
 
